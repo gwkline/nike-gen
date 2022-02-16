@@ -22,6 +22,7 @@ import (
 )
 
 //////////////////////////////////////////////////////////////////////////////////////////
+//							CUSTOM OBJECTS AND STRUCTURES								//
 //////////////////////////////////////////////////////////////////////////////////////////
 type Proxy struct {
 	User string `json:"user"`
@@ -53,10 +54,10 @@ type VerificationObject struct {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
+//						HELPER FUNCTIONS AND OTHER UTILITIES							//
 //////////////////////////////////////////////////////////////////////////////////////////
 func typeWord(sel interface{}, word string, opts func(*chromedp.Selector), ctx context.Context) chromedp.Tasks {
 	return chromedp.Tasks{
-		print("Working"),
 		chromedp.ActionFunc(func(ctx context.Context) error {
 
 			runeList := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
@@ -64,9 +65,9 @@ func typeWord(sel interface{}, word string, opts func(*chromedp.Selector), ctx c
 			for _, v := range word {
 				rand.Seed(time.Now().UnixNano())
 				randomInt := rand.Intn(999)
-				randDel := (rand.Intn(150) + 150)
+				randDel := (rand.Intn(150) + 75)
 
-				if randomInt < 900 {
+				if randomInt < 939 {
 					chromedp.SendKeys(sel, string(v), opts).Do(ctx)
 					chromedp.Sleep(time.Duration(randDel) * time.Millisecond).Do(ctx)
 				} else {
@@ -78,6 +79,40 @@ func typeWord(sel interface{}, word string, opts func(*chromedp.Selector), ctx c
 				}
 			}
 
+			return nil
+		}),
+	}
+}
+
+func randDelay(length int, ctx context.Context) chromedp.Tasks {
+	return chromedp.Tasks{
+		chromedp.ActionFunc(func(ctx context.Context) error {
+			rand.Seed(time.Now().UnixNano())
+			num := rand.Intn(150)
+			switch num {
+			case 0:
+				chromedp.Sleep(time.Duration(num+0) * time.Millisecond).Do(ctx)
+			case 1:
+				chromedp.Sleep(time.Duration(num+10) * time.Millisecond).Do(ctx)
+			case 2:
+				chromedp.Sleep(time.Duration(num+20) * time.Millisecond).Do(ctx)
+			case 3:
+				chromedp.Sleep(time.Duration(num+30) * time.Millisecond).Do(ctx)
+			case 4:
+				chromedp.Sleep(time.Duration(num+50) * time.Millisecond).Do(ctx)
+			case 5:
+				chromedp.Sleep(time.Duration(num+100) * time.Millisecond).Do(ctx)
+			case 6:
+				chromedp.Sleep(time.Duration(num+175) * time.Millisecond).Do(ctx)
+			case 7:
+				chromedp.Sleep(time.Duration(num+250) * time.Millisecond).Do(ctx)
+			case 8:
+				chromedp.Sleep(time.Duration(num+500) * time.Millisecond).Do(ctx)
+			case 9:
+				chromedp.Sleep(time.Duration(num+750) * time.Millisecond).Do(ctx)
+			case 10:
+				chromedp.Sleep(time.Duration(num+1000) * time.Millisecond).Do(ctx)
+			}
 			return nil
 		}),
 	}
@@ -97,24 +132,34 @@ func randomProd() string {
 	num := rand.Intn(9)
 	switch num {
 	case 0:
+		fmt.Println("shirt")
 		return "shirt"
 	case 1:
+		fmt.Println("shoes")
 		return "shoes"
 	case 3:
+		fmt.Println("pants")
 		return "pants"
 	case 4:
+		fmt.Println("socks")
 		return "socks"
 	case 5:
+		fmt.Println("jacket")
 		return "jacket"
 	case 6:
+		fmt.Println("fleece")
 		return "fleece"
 	case 7:
+		fmt.Println("sweatshirt")
 		return "sweatshirt"
 	case 8:
+		fmt.Println("sweat")
 		return "sweat"
 	case 9:
+		fmt.Println("dri fit")
 		return "dri fit"
 	}
+	fmt.Println("clothes")
 	return "clothes"
 }
 
@@ -154,7 +199,80 @@ func PrettyPrint(i interface{}) string {
 	return string(s)
 }
 
+func testTask() chromedp.Tasks {
+	return chromedp.Tasks{
+		chromedp.Navigate("https://detect.azerpas.com"),
+		chromedp.Sleep(time.Duration(10 * time.Second)),
+	}
+}
+
+func loadProxies() []Proxy {
+
+	var proxies []Proxy
+
+	// open file
+	f, err := os.Open("proxies.txt")
+	if err != nil {
+		panic(err)
+	}
+	// remember to close the file at the end of the program
+	defer f.Close()
+
+	// read the file line by line using scanner
+	scanner := bufio.NewScanner(f)
+
+	for scanner.Scan() {
+		if scanner.Text() != "" {
+			split := strings.Split(scanner.Text(), ":")
+			var prox Proxy
+			prox.IP = split[0]
+			prox.Port = split[1]
+			prox.User = split[2]
+			prox.Pass = split[3]
+			proxies = append(proxies, prox)
+
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		panic(err)
+	}
+
+	rand.Seed(time.Now().UnixNano())
+	rand.Shuffle(len(proxies), func(i, j int) { proxies[i], proxies[j] = proxies[j], proxies[i] })
+	return proxies
+}
+
+func loadEmails() []string {
+
+	var emails []string
+	// open file
+	f, err := os.Open("emails.txt")
+	if err != nil {
+		panic(err)
+	}
+	// remember to close the file at the end of the program
+	defer f.Close()
+
+	// read the file line by line using scanner
+	scanner := bufio.NewScanner(f)
+
+	for scanner.Scan() {
+		if scanner.Text() != "" {
+			emails = append(emails, scanner.Text())
+
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		panic(err)
+	}
+
+	return emails
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////
+//									GOOGLE TASKS										//
 //////////////////////////////////////////////////////////////////////////////////////////
 func googleTask(ctx context.Context) chromedp.Tasks {
 	return chromedp.Tasks{
@@ -171,63 +289,75 @@ func googleTask(ctx context.Context) chromedp.Tasks {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
+//									LOGIN TASKS											//
 //////////////////////////////////////////////////////////////////////////////////////////
 func nikeSignupTask(favoriteBtn string, joinUsBtn string, genderBtn string, ctx context.Context) chromedp.Tasks {
-	//TODO: Pull emails from .txt file
 	//TODO: Gender Selector
 	//TODO: Add scrolling/mouse movement
-	// chromedp.ActionFunc(func(ctx context.Context) error {
-	// 	_, exp, err := runtime.Evaluate(`window.getElementByID("shippingPickup").scrollIntoView({behavior: smooth});`).Do(ctx)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	if exp != nil {
-	// 		return exp
-	// 	}
-	// 	return nil
-	// }),
-	// chromedp.ActionFunc(func(ctx context.Context) error {
-	// 	_, exp, err := runtime.Evaluate(`window.scroll({top: -200, behavior:'smooth'});`).Do(ctx)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	if exp != nil {
-	// 		return exp
-	// 	}
-	// 	return nil
-	// }),
+
+	gender := 1 //randomdata.RandomGender
+	fmt.Print(gender)
+	firstName := randomdata.FirstName(gender)
+	lastName := randomdata.LastName()
+
+	rand.Seed(time.Now().UnixNano())
+	num := rand.Intn(2)
+	email := "test"
+	switch num {
+	case 0:
+		email = firstName + lastName + fmt.Sprint(rand.Intn(999)) + "@gmail.com"
+	case 1:
+		email = firstName + lastName + fmt.Sprint(rand.Intn(99)) + "@gmail.com"
+	case 2:
+		email = firstName + lastName + fmt.Sprint(rand.Intn(9)) + "@gmail.com"
+	}
+
+	switch gender {
+	case 0:
+		genderBtn = `li:nth-child(1) > input[type="button"]`
+	case 1:
+		genderBtn = `ul:nth-child(4) > input[type="button"]`
+	}
+
 	return chromedp.Tasks{
 
-		//Wait for product page to become visible
-		chromedp.Navigate("https://www.nike.com/t/metcon-7-x-training-shoes-0l6Psg"),
+		//chromedp.Navigate("https://www.nike.com/t/metcon-7-x-training-shoes-0l6Psg"),
 		chromedp.WaitVisible(`#hf_header_label_copyright`, chromedp.ByID),
+		randDelay(10, ctx),
+		chromedp.ScrollIntoView(`#RightRail > div > div.prl6-sm.prl0-lg > div > span > details`, chromedp.ByID),
+		randDelay(10, ctx),
+		randDelay(10, ctx),
+		chromedp.Click(`#RightRail > div > div.prl6-sm.prl0-lg > div > span > details`, chromedp.ByQuery),
+		randDelay(10, ctx),
 		//Click Favorite Button
+		randDelay(4, ctx),
+		chromedp.ScrollIntoView(`#floating-atc-wrapper > div > button.wishlist-btn.ncss-btn-secondary-dark.btn-lg.mt3-sm`, chromedp.ByQuery),
 		chromedp.Click(`#floating-atc-wrapper > div > button.wishlist-btn.ncss-btn-secondary-dark.btn-lg.mt3-sm`, chromedp.ByQuery),
 		chromedp.WaitVisible(`#nike-unite-login-view > header > div.nike-unite-swoosh`, chromedp.ByQuery),
 
 		//Enters Email in Field
-		print("Inputting email"),
-		typeWord(`//*[@placeholder="Email address"]`, randomdata.Email(), chromedp.BySearch, ctx),
+		randDelay(10, ctx),
+		typeWord(`//*[@placeholder="Email address"]`, email, chromedp.BySearch, ctx),
 
 		//Clicks Join Us Button
-		print("Clicking 'Join Us' Button"),
+		randDelay(10, ctx),
 		chromedp.Click(`.loginJoinLink.current-member-signin > a`, chromedp.ByQuery),
 
 		//Enters Form Data
-		print("Inputting password"),
+		randDelay(10, ctx),
 		typeWord(`[placeholder="Password"]`, password.MustGenerate(15, 3, 3, false, false), chromedp.BySearch, ctx),
-		print("Inputting First Name"),
-		typeWord(`[placeholder="First Name"]`, randomdata.FirstName(randomdata.RandomGender), chromedp.BySearch, ctx),
-		print("Inputting Last Name"),
-		typeWord(`[placeholder="Last Name"]`, randomdata.LastName(), chromedp.BySearch, ctx),
-		print("Inputting DOB"),
-		typeWord(`[placeholder="Date of Birth"]`, monthToDigit(randomdata.Month())+fmt.Sprint(randomdata.Number(2))+fmt.Sprint(randomdata.Number(9))+fmt.Sprint(rand.Intn(45)+1960), chromedp.BySearch, ctx),
+		randDelay(10, ctx),
+		typeWord(`[placeholder="First Name"]`, firstName, chromedp.BySearch, ctx),
+		randDelay(10, ctx),
+		typeWord(`[placeholder="Last Name"]`, lastName, chromedp.BySearch, ctx),
+		randDelay(10, ctx),
+		chromedp.SendKeys(`[placeholder="Date of Birth"]`, monthToDigit(randomdata.Month())+fmt.Sprint(randomdata.Number(2))+fmt.Sprint(randomdata.Number(9))+fmt.Sprint(rand.Intn(45)+1960), chromedp.BySearch),
 
 		//Clicks Male Gender Button
-		print("Clicking Gender"),
+		randDelay(10, ctx),
 		chromedp.Click(`li:nth-child(1) > input[type="button"]`, chromedp.ByQuery),
 
-		print("Clicking 'Create Account'"),
+		randDelay(10, ctx),
 		chromedp.Click(`[value="JOIN US"]`, chromedp.BySearch),
 		chromedp.Sleep(1000 * time.Second),
 	}
@@ -278,6 +408,7 @@ func nikeConfirmPhoneNumber(code string, ctx context.Context) chromedp.Tasks {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
+//								SMS VERIFICATION TASKS									//
 //////////////////////////////////////////////////////////////////////////////////////////
 func GetSMSToken() BearerResponse {
 	tvURL := "https://www.textverified.com/api/"
@@ -377,58 +508,16 @@ func CheckExistingNumber(bear BearerResponse, num VerificationObject) string {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-func testTask() chromedp.Tasks {
-	return chromedp.Tasks{
-		chromedp.Navigate("https://detect.azerpas.com"),
-		chromedp.Sleep(time.Duration(10 * time.Second)),
-	}
-}
-func loadProxies() []Proxy {
-
-	var proxies []Proxy
-
-	// open file
-	f, err := os.Open("proxies.txt")
-	if err != nil {
-		panic(err)
-	}
-	// remember to close the file at the end of the program
-	defer f.Close()
-
-	// read the file line by line using scanner
-	scanner := bufio.NewScanner(f)
-
-	for scanner.Scan() {
-		if scanner.Text() != "" {
-			split := strings.Split(scanner.Text(), ":")
-			var prox Proxy
-			prox.IP = split[0]
-			prox.Port = split[1]
-			prox.User = split[2]
-			prox.Pass = split[3]
-			proxies = append(proxies, prox)
-
-		}
-	}
-
-	if err := scanner.Err(); err != nil {
-		panic(err)
-	}
-
-	rand.Seed(time.Now().UnixNano())
-	rand.Shuffle(len(proxies), func(i, j int) { proxies[i], proxies[j] = proxies[j], proxies[i] })
-	return proxies
-}
-
+//								TASK ENGINE AND MAIN									//
+//////////////////////////////////////////////////////////////////////////////////////////
 //TODO:
 // - MAKE THREADED
 // - BEGIN BROWSER CONFIGURATION (TLS?)
-// - FIX TypeWord FUNCTION
-//
+// -
 //
 // FURTHER TODO'S LISTED BELOW
 
-func runTasks(proxy Proxy) {
+func runTasks(proxy Proxy, email string) {
 
 	//GET DOM TRAVERSAL VALUES
 	favoriteBtn := `#floating-atc-wrapper > div > button.wishlist-btn.ncss-btn-secondary-dark.btn-lg.mt3-sm`
@@ -445,8 +534,6 @@ func runTasks(proxy Proxy) {
 	// acceptCookies := `#cookie-settings-layout > div > div > div > div.ncss-row.mt5-sm.mb7-sm > div:nth-child(2) > button`
 	// loginBtn := `li.member-nav-item.d-sm-ib.va-sm-m > button`
 
-	//TODO: FIX ALL THIS SHIT
-	fmt.Println("Setting up browser")
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
 		chromedp.Flag(`headless`, false),
 		chromedp.Flag(`incognito`, true),
@@ -459,9 +546,6 @@ func runTasks(proxy Proxy) {
 		chromedp.ProxyServer(""),
 		//chromedp.ProxyServer("http://"+proxy.IP+":"+proxy.Port),
 	)
-
-	// create chromedp's context
-	fmt.Println("Creating context")
 	parentCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
 	defer cancel()
 	ctx, cancel := chromedp.NewContext(parentCtx)
@@ -470,11 +554,10 @@ func runTasks(proxy Proxy) {
 
 	//create a timeout
 	//TODO: ADD ADJUSTABILITY
-	fmt.Println("Creating timeout")
-	ctx, cancel = context.WithTimeout(ctx, 150*time.Second)
-	defer cancel()
+	// fmt.Println("Creating timeout")
+	// ctx, cancel = context.WithTimeout(ctx, 150*time.Second)
+	// defer cancel()
 
-	fmt.Println("Authenticating proxy")
 	lctx, lcancel := context.WithCancel(ctx)
 	chromedp.ListenTarget(lctx, func(ev interface{}) {
 		switch ev := ev.(type) {
@@ -503,9 +586,8 @@ func runTasks(proxy Proxy) {
 
 	//googles a random nike product
 	//TODO: TRUE RANDOM PRODUCT SEARCH
-	fmt.Println("Beginning New Task: Google")
 	var nodes []*cdp.Node
-	//var productLinks []cdp.NodeID
+	var productLinks []string
 
 	err := chromedp.Run(ctx,
 		fetch.Enable().WithHandleAuthRequests(true),
@@ -517,21 +599,26 @@ func runTasks(proxy Proxy) {
 	if err != nil {
 		panic(err)
 	}
-
-	// for _, n := range nodes {
-	// 	if strings.Contains(n.AttributeValue("href"), "https://www.nike.com/t/") {
-	// 		fmt.Println(n.AttributeValue("href"))
-	// 		productLinks = append(productLinks, n.NodeID)
-	// 	}
-	// }
-
-	// rand.Seed(time.Now().UnixNano())
-	// randIdx := rand.Intn(len(productLinks))
-	// randNodeID := productLinks[randIdx]
+	fmt.Println("hmm1")
+	for _, n := range nodes {
+		if strings.Contains(n.AttributeValue("href"), "https://www.nike.com/t/") {
+			fmt.Println(n.AttributeValue("href"))
+			productLinks = append(productLinks, n.AttributeValue("href"))
+		}
+	}
+	fmt.Println("hmm2")
+	rand.Seed(time.Now().UnixNano())
+	randIdx := rand.Intn(len(productLinks))
+	randURL := productLinks[randIdx]
+	searchString := `[href="` + randURL + `"]`
+	fmt.Println(searchString)
 
 	fmt.Println("Beginning New Task: Nike")
 	err = chromedp.Run(ctx,
 		fetch.Enable().WithHandleAuthRequests(true),
+
+		chromedp.Click(searchString, chromedp.BySearch),
+
 		nikeSignupTask(favoriteBtn, registerBtn, genderBtn, ctx),
 		print("Signup Complete"),
 		nikeGoToPhoneNumber(ctx),
@@ -561,6 +648,7 @@ func runTasks(proxy Proxy) {
 func main() {
 
 	proxies := loadProxies()
+	emails := loadEmails()
 
 	//for i in len(proxies):
 
@@ -568,9 +656,14 @@ func main() {
 	randIdx := rand.Intn(len(proxies))
 
 	randProx := proxies[randIdx]
+	email := emails[0]
 	//proxies = append(proxies[:randIdx], proxies[randIdx+1:]...)
+	//emails = append(emails[:i], emails[i+1:]...)
 
+	fmt.Println("")
 	fmt.Println("Proxy being used: " + randProx.IP)
+	fmt.Println("Email being used: " + email)
+	fmt.Println("")
 
-	runTasks(randProx)
+	runTasks(randProx, email)
 }
