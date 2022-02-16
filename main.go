@@ -70,6 +70,16 @@ func typeWord(sel interface{}, word string, opts func(*chromedp.Selector), ctx c
 				if randomInt < 939 {
 					chromedp.SendKeys(sel, string(v), opts).Do(ctx)
 					chromedp.Sleep(time.Duration(randDel) * time.Millisecond).Do(ctx)
+				} else if randomInt < 965 {
+					chromedp.SendKeys(sel, string(byte(runeList[rand.Intn(len(runeList))])), opts).Do(ctx)
+					chromedp.Sleep(time.Duration(randDel) * time.Millisecond).Do(ctx)
+					chromedp.SendKeys(sel, string(byte(runeList[rand.Intn(len(runeList))])), opts).Do(ctx)
+					chromedp.Sleep(time.Duration(randDel) * time.Millisecond).Do(ctx)
+					chromedp.SendKeys(sel, kb.Backspace, opts).Do(ctx)
+					chromedp.Sleep(time.Duration(randDel) * time.Millisecond).Do(ctx)
+					chromedp.SendKeys(sel, kb.Backspace, opts).Do(ctx)
+					chromedp.Sleep(time.Duration(randDel) * time.Millisecond).Do(ctx)
+					chromedp.SendKeys(sel, string(v), opts).Do(ctx)
 				} else {
 					chromedp.SendKeys(sel, string(byte(runeList[rand.Intn(len(runeList))])), opts).Do(ctx)
 					chromedp.Sleep(time.Duration(randDel) * time.Millisecond).Do(ctx)
@@ -144,7 +154,7 @@ func randomProd() string {
 		fmt.Println("socks")
 		return "socks"
 	case 5:
-		fmt.Println("jacket")
+		fmt.Println("jacket | DIDNT WORK")
 		return "jacket"
 	case 6:
 		fmt.Println("fleece")
@@ -159,7 +169,7 @@ func randomProd() string {
 		fmt.Println("dri fit")
 		return "dri fit"
 	}
-	fmt.Println("clothes")
+	fmt.Println("clothes | DIDNT WORK")
 	return "clothes"
 }
 
@@ -292,10 +302,9 @@ func googleTask(ctx context.Context) chromedp.Tasks {
 //									LOGIN TASKS											//
 //////////////////////////////////////////////////////////////////////////////////////////
 func nikeSignupTask(favoriteBtn string, joinUsBtn string, genderBtn string, ctx context.Context) chromedp.Tasks {
-	//TODO: Gender Selector
 	//TODO: Add scrolling/mouse movement
 
-	gender := 1 //randomdata.RandomGender
+	gender := randomdata.RandomGender
 	fmt.Print(gender)
 	firstName := randomdata.FirstName(gender)
 	lastName := randomdata.LastName()
@@ -316,48 +325,60 @@ func nikeSignupTask(favoriteBtn string, joinUsBtn string, genderBtn string, ctx 
 	case 0:
 		genderBtn = `li:nth-child(1) > input[type="button"]`
 	case 1:
-		genderBtn = `ul:nth-child(4) > input[type="button"]`
+		genderBtn = `li:nth-child(2) > input[type="button"]`
 	}
 
 	return chromedp.Tasks{
 
-		//chromedp.Navigate("https://www.nike.com/t/metcon-7-x-training-shoes-0l6Psg"),
 		chromedp.WaitVisible(`#hf_header_label_copyright`, chromedp.ByID),
+		//move mouse around
+		//slowly scroll to bottom
+		//mouse move
 		randDelay(10, ctx),
-		chromedp.ScrollIntoView(`#RightRail > div > div.prl6-sm.prl0-lg > div > span > details`, chromedp.ByID),
-		randDelay(10, ctx),
-		randDelay(10, ctx),
-		chromedp.Click(`#RightRail > div > div.prl6-sm.prl0-lg > div > span > details`, chromedp.ByQuery),
-		randDelay(10, ctx),
-		//Click Favorite Button
-		randDelay(4, ctx),
-		chromedp.ScrollIntoView(`#floating-atc-wrapper > div > button.wishlist-btn.ncss-btn-secondary-dark.btn-lg.mt3-sm`, chromedp.ByQuery),
-		chromedp.Click(`#floating-atc-wrapper > div > button.wishlist-btn.ncss-btn-secondary-dark.btn-lg.mt3-sm`, chromedp.ByQuery),
-		chromedp.WaitVisible(`#nike-unite-login-view > header > div.nike-unite-swoosh`, chromedp.ByQuery),
 
-		//Enters Email in Field
-		randDelay(10, ctx),
-		typeWord(`//*[@placeholder="Email address"]`, email, chromedp.BySearch, ctx),
+		//move mouse
+		//scroll halfway up
+		//mouse move to Target
+		chromedp.ScrollIntoView(`#RightRail > div > div.prl6-sm.prl0-lg > div > span > details`, chromedp.ByID),
+		chromedp.Click(`#RightRail > div > div.prl6-sm.prl0-lg > div > span > details`, chromedp.ByQuery),
+		//or scroll to/click product details
+		//LONER pause
+
+		//Click Favorite Button
+		chromedp.ScrollIntoView(`#floating-atc-wrapper > div > button.wishlist-btn.ncss-btn-secondary-dark.btn-lg.mt3-sm`, chromedp.ByQuery),
+		//move mouse
+		chromedp.Click(`#floating-atc-wrapper > div > button.wishlist-btn.ncss-btn-secondary-dark.btn-lg.mt3-sm`, chromedp.ByQuery),
 
 		//Clicks Join Us Button
-		randDelay(10, ctx),
+		chromedp.WaitVisible(`#nike-unite-login-view > header > div.nike-unite-swoosh`, chromedp.ByQuery),
+		//move mouse
 		chromedp.Click(`.loginJoinLink.current-member-signin > a`, chromedp.ByQuery),
 
 		//Enters Form Data
-		randDelay(10, ctx),
+		//random slight scroll
+
+		//mouse move + click
+		//delay
+		typeWord(`//*[@placeholder="Email address"]`, email, chromedp.BySearch, ctx),
+
+		//tab (+ med delay) OR mouse move + click (+ high delay)
 		typeWord(`[placeholder="Password"]`, password.MustGenerate(15, 3, 3, false, false), chromedp.BySearch, ctx),
-		randDelay(10, ctx),
+
+		//tab (+ med delay) OR mouse move + click (+ high delay)
 		typeWord(`[placeholder="First Name"]`, firstName, chromedp.BySearch, ctx),
-		randDelay(10, ctx),
+
+		//tab (+ med delay) OR mouse move + click (+ high delay)
 		typeWord(`[placeholder="Last Name"]`, lastName, chromedp.BySearch, ctx),
-		randDelay(10, ctx),
+
+		//tab (+ med delay) OR mouse move + click (+ high delay)
+		//TODO: FIX typeWord for DOB, make higher than avg delays, different backspace mechanics
 		chromedp.SendKeys(`[placeholder="Date of Birth"]`, monthToDigit(randomdata.Month())+fmt.Sprint(randomdata.Number(2))+fmt.Sprint(randomdata.Number(9))+fmt.Sprint(rand.Intn(45)+1960), chromedp.BySearch),
 
-		//Clicks Male Gender Button
-		randDelay(10, ctx),
-		chromedp.Click(`li:nth-child(1) > input[type="button"]`, chromedp.ByQuery),
+		//Clicks Gender Button
+		//delay + mouse move
+		chromedp.Click(genderBtn, chromedp.ByQuery),
 
-		randDelay(10, ctx),
+		//delay + mouse move
 		chromedp.Click(`[value="JOIN US"]`, chromedp.BySearch),
 		chromedp.Sleep(1000 * time.Second),
 	}
@@ -554,9 +575,8 @@ func runTasks(proxy Proxy, email string) {
 
 	//create a timeout
 	//TODO: ADD ADJUSTABILITY
-	// fmt.Println("Creating timeout")
-	// ctx, cancel = context.WithTimeout(ctx, 150*time.Second)
-	// defer cancel()
+	ctx, cancel = context.WithTimeout(ctx, 600*time.Second)
+	defer cancel()
 
 	lctx, lcancel := context.WithCancel(ctx)
 	chromedp.ListenTarget(lctx, func(ev interface{}) {
@@ -591,22 +611,21 @@ func runTasks(proxy Proxy, email string) {
 
 	err := chromedp.Run(ctx,
 		fetch.Enable().WithHandleAuthRequests(true),
-		//testTask(),
+		testTask(),
+		chromedp.Sleep(10*time.Second),
 		googleTask(ctx),
-		print("Google - Complete"),
 		chromedp.Nodes("a", &nodes),
 	)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("hmm1")
 	for _, n := range nodes {
 		if strings.Contains(n.AttributeValue("href"), "https://www.nike.com/t/") {
 			fmt.Println(n.AttributeValue("href"))
 			productLinks = append(productLinks, n.AttributeValue("href"))
 		}
 	}
-	fmt.Println("hmm2")
+
 	rand.Seed(time.Now().UnixNano())
 	randIdx := rand.Intn(len(productLinks))
 	randURL := productLinks[randIdx]
@@ -616,7 +635,7 @@ func runTasks(proxy Proxy, email string) {
 	fmt.Println("Beginning New Task: Nike")
 	err = chromedp.Run(ctx,
 		fetch.Enable().WithHandleAuthRequests(true),
-
+		randDelay(10, ctx),
 		chromedp.Click(searchString, chromedp.BySearch),
 
 		nikeSignupTask(favoriteBtn, registerBtn, genderBtn, ctx),
