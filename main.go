@@ -342,7 +342,7 @@ func nikeSignupTask(favoriteBtn string, joinUsBtn string, genderBtn string, ctx 
 		chromedp.ScrollIntoView(`#RightRail > div > div.prl6-sm.prl0-lg > div > span > details`, chromedp.ByID),
 		chromedp.Click(`#RightRail > div > div.prl6-sm.prl0-lg > div > span > details`, chromedp.ByQuery),
 		//or scroll to/click product details
-		//LONER pause
+		//LONGER pause
 
 		//Click Favorite Button
 		chromedp.ScrollIntoView(`#floating-atc-wrapper > div > button.wishlist-btn.ncss-btn-secondary-dark.btn-lg.mt3-sm`, chromedp.ByQuery),
