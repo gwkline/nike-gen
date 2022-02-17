@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"os"
 	"strings"
 	"time"
 
@@ -14,22 +15,7 @@ import (
 
 func runTasks(proxy Proxy, email string, tid string) {
 
-	//GET DOM TRAVERSAL VALUES
-	favoriteBtn := `#floating-atc-wrapper > div > button.wishlist-btn.ncss-btn-secondary-dark.btn-lg.mt3-sm`
-	registerBtn := `.loginJoinLink.current-member-signin > a`
-	genderBtn := `li:nth-child(1) > input[type="button"]`
-	// phoneBtn := `div.sendCode > div.mobileNumber-div > input`
-	// phoneloginBtn := `#root > div > div > div.main-layout > div > header > div.d-sm-h.d-lg-b > section > div > ul > li.member-nav-item.d-sm-ib.va-sm-m > div > div > button`
-	// settingBtn := `#root > div > div > div.main-layout > div > header > div.d-sm-h.d-lg-b > section > div > ul > li.member-nav-item.d-sm-ib.va-sm-m > div > div > ul > li:nth-child(1)`
-	// addBtn := `#mobile-container > div > div > form > div.account-form > div.mex-mobile-input-wrapper.ncss-col-sm-12.ncss-col-md-12.pl0-sm.pr0-sm.pb3-sm > div > div > div > div.ncss-col-sm-6.ta-sm-r.va-sm-m.flx-jc-sm-fe.d-sm-iflx > button`
-	// numcountryBtn := `select[class="country"]`
-	// sendNumBtn := `#nike-unite-progressiveForm > div > div > input[type="button"]`
-	// enterTheValueBtn := `input[type="number"]`
-	// storedSubmitBtn := `#nike-unite-progressiveForm > div > input[type="button"]`
-	// acceptCookies := `#cookie-settings-layout > div > div > div > div.ncss-row.mt5-sm.mb7-sm > div:nth-child(2) > button`
-	// loginBtn := `li.member-nav-item.d-sm-ib.va-sm-m > button`
-
-	fmt.Println("Task ID: " + tid + " - Initializing")
+	fmt.Println("Task ID: " + tid + " - Initializing Browser")
 
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
 		chromedp.Flag(`headless`, false),
@@ -53,7 +39,6 @@ func runTasks(proxy Proxy, email string, tid string) {
 	//TODO: ADD ADJUSTABILITY
 	ctx, cancel = context.WithTimeout(ctx, 600*time.Second)
 	defer cancel()
-
 	lctx, lcancel := context.WithCancel(ctx)
 	chromedp.ListenTarget(lctx, func(ev interface{}) {
 		switch ev := ev.(type) {
@@ -85,11 +70,12 @@ func runTasks(proxy Proxy, email string, tid string) {
 	var nodes []*cdp.Node
 	var productLinks []string
 
-	fmt.Println("Task ID: " + tid + " - Beginning Google")
+	//Google Tasks (And Debug)
+	fmt.Println("Task ID: " + tid + " - Launching Browser")
 	err := chromedp.Run(ctx,
 		fetch.Enable().WithHandleAuthRequests(true),
-		testTask(),
-		chromedp.Sleep(10*time.Second),
+		//testTask(tid),
+		//chromedp.Sleep(10*time.Second),
 		googleTask(ctx, tid),
 		chromedp.Nodes("a", &nodes),
 	)
@@ -97,48 +83,58 @@ func runTasks(proxy Proxy, email string, tid string) {
 		panic(err)
 	}
 
-	//Product link collector
+	//Product Link Collector
 	for _, n := range nodes {
 		if strings.Contains(n.AttributeValue("href"), "https://www.nike.com/t/") {
-			fmt.Println(n.AttributeValue("href"))
 			productLinks = append(productLinks, n.AttributeValue("href"))
 		}
 	}
+	if len(productLinks) == 0 {
+		os.Exit(129)
+	}
 
-	//Random link selector
+	//Random Link Selector
 	rand.Seed(time.Now().UnixNano())
 	randIdx := rand.Intn(len(productLinks))
 	randURL := productLinks[randIdx]
-	searchString := `[href="` + randURL + `"]`
+	//searchString := `[href="` + randURL + `"]`
 	fmt.Println("Task ID: " + tid + " - Product Chosen (" + randURL + ")")
 
-	fmt.Println("Task ID: " + tid + " - Beginning Login")
+	//Login Tasks
+
 	err = chromedp.Run(ctx,
 		fetch.Enable().WithHandleAuthRequests(true),
 		randDelay(10, ctx),
-		chromedp.Click(searchString, chromedp.BySearch),
-
-		nikeSignupTask(favoriteBtn, registerBtn, genderBtn, ctx),
-		print("Signup Complete"),
-		nikeGoToPhoneNumber(ctx),
+		//chromedp.Click(searchString, chromedp.BySearch),
+		print("Task ID: "+tid+" - Beginning Sign Up"),
+		nikeSignupTask(ctx, tid),
+		print("Task ID: "+tid+" - Signup Complete"),
+		print("Task ID: "+tid+" - Navigating To Settings"),
+		nikeGoToPhoneNumber(ctx, tid),
 	)
 	if err != nil {
 		panic(err)
 	}
 
-	token := GetSMSToken()
-	order := OrderNewNumber(token)
+	//SMS Tasks (Init)
+	fmt.Println("Task ID: " + tid + " - Getting SMS Token")
+	token := GetSMSToken(tid)
+	fmt.Println("Task ID: " + tid + " - Ordering New Number")
+	order := OrderNewNumber(token, tid)
 	err = chromedp.Run(ctx,
 		fetch.Enable().WithHandleAuthRequests(true),
-		nikeInputPhoneNumber(string(order.Number), ctx))
+		print("Task ID: "+tid+" - Beginning Number Input Process"),
+		nikeInputPhoneNumber(string(order.Number), ctx, tid))
 	if err != nil {
 		panic(err)
 	}
 
-	code := CheckExistingNumber(token, order)
+	//SMS Tasks (Confirm)
+	fmt.Println("Task ID: " + tid + " - Waiting For Code")
+	code := CheckExistingNumber(token, order, tid, 1)
 	err = chromedp.Run(ctx,
 		fetch.Enable().WithHandleAuthRequests(true),
-		nikeConfirmPhoneNumber(code, ctx))
+		nikeConfirmPhoneNumber(code, ctx, tid))
 	if err != nil {
 		panic(err)
 	}

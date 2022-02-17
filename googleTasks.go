@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"math/rand"
 	"time"
 
@@ -14,6 +15,7 @@ import (
 //////////////////////////////////////////////////////////////////////////////////////////
 func googleTask(ctx context.Context, tid string) chromedp.Tasks {
 	return chromedp.Tasks{
+		print("Task ID: " + tid + " - Beginning Google"),
 		chromedp.Navigate("https://www.google.com"),
 		chromedp.Sleep(time.Duration(3 * time.Second)),
 		chromedp.WaitVisible(`#Mses6b`),
@@ -24,4 +26,15 @@ func googleTask(ctx context.Context, tid string) chromedp.Tasks {
 		chromedp.Click(`h3`, chromedp.ByQuery),
 		chromedp.Sleep(time.Duration(rand.Intn(6)) * time.Second),
 	}
+}
+
+func randomProd(tid string) string {
+
+	choices := []string{"shirt", "shorts", "accessories", "hats"}
+	rand.Seed(time.Now().UnixNano())
+	num := rand.Intn(len(choices))
+
+	fmt.Println("Task ID: " + tid + " - Search String Shosen: " + choices[num])
+
+	return choices[num]
 }

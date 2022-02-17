@@ -22,7 +22,6 @@ func typeWord(sel interface{}, word string, opts func(*chromedp.Selector), ctx c
 		chromedp.ActionFunc(func(ctx context.Context) error {
 
 			runeList := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-			fmt.Println(word)
 			for _, v := range word {
 				rand.Seed(time.Now().UnixNano())
 				randomInt := rand.Intn(999)
@@ -98,15 +97,6 @@ func print(message string) chromedp.Tasks {
 	}
 }
 
-func randomProd(tid string) string {
-	rand.Seed(time.Now().UnixNano())
-	num := rand.Intn(9)
-	choices := []string{"shirt", "pants", "shorts", "sneakers", "tops", "socks", "accessories", "hats"}
-
-	fmt.Println("Task: " + tid + "- Searching: " + choices[num])
-	return choices[num]
-}
-
 func monthToDigit(month string) string {
 	switch month {
 	case "January":
@@ -143,9 +133,11 @@ func PrettyPrint(i interface{}) string {
 	return string(s)
 }
 
-func testTask() chromedp.Tasks {
+func testTask(tid string) chromedp.Tasks {
 	return chromedp.Tasks{
+		print("Task ID: " + tid + " - Beginning Debug"),
 		chromedp.Navigate("https://detect.azerpas.com"),
+		print("Task ID: " + tid + " - Waiting: 10s"),
 		chromedp.Sleep(time.Duration(10 * time.Second)),
 	}
 }
@@ -157,7 +149,7 @@ func loadProxies() []Proxy {
 	// open file
 	f, err := os.Open("proxies.txt")
 	if err != nil {
-		panic(err)
+		os.Exit(133)
 	}
 	// remember to close the file at the end of the program
 	defer f.Close()
@@ -179,9 +171,8 @@ func loadProxies() []Proxy {
 	}
 
 	if err := scanner.Err(); err != nil {
-		panic(err)
+		os.Exit(130)
 	}
-
 	rand.Seed(time.Now().UnixNano())
 	rand.Shuffle(len(proxies), func(i, j int) { proxies[i], proxies[j] = proxies[j], proxies[i] })
 	return proxies
@@ -193,7 +184,7 @@ func loadEmails() []string {
 	// open file
 	f, err := os.Open("emails.txt")
 	if err != nil {
-		panic(err)
+		os.Exit(131)
 	}
 	// remember to close the file at the end of the program
 	defer f.Close()
@@ -209,7 +200,7 @@ func loadEmails() []string {
 	}
 
 	if err := scanner.Err(); err != nil {
-		panic(err)
+		os.Exit(132)
 	}
 
 	return emails

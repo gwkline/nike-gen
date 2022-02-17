@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 )
@@ -14,25 +15,32 @@ import (
 //////////////////////////////////////////////////////////////////////////////////////////
 //								SMS VERIFICATION TASKS									//
 //////////////////////////////////////////////////////////////////////////////////////////
-func GetSMSToken() BearerResponse {
+func GetSMSToken(tid string) BearerResponse {
 	tvURL := "https://www.textverified.com/api/"
 	client := http.Client{}
+	fmt.Println("Task ID: " + tid + " - Requesting SMS Authorization")
 	req, err := http.NewRequest("POST", tvURL+"SimpleAuthentication", nil)
 	if err != nil {
-		panic(err)
+		os.Exit(134)
 	}
 
 	req.Header = http.Header{
 		"X-SIMPLE-API-ACCESS-TOKEN": []string{"1_l8T2o8bPsP252roHDXhtO-tRzX3tqROlPzzam8kTaj7YPRlnccMekpuAmRsDh4r9_H13sjOr"},
 	}
 
+	fmt.Println("Task ID: " + tid + " - Getting Bearer Token")
 	res, err := client.Do(req)
 	if err != nil {
-		panic(err)
+
+		nilbear := BearerResponse{"Auth Not Found", time.Now(), 0}
+
+		os.Exit(135)
+		return nilbear
+
 	} else {
 		bodyBytes, err := io.ReadAll(res.Body)
 		if err != nil {
-			panic(err)
+			os.Exit(136)
 		}
 		//bodyString := string(bodyBytes)
 		var bear BearerResponse
@@ -42,40 +50,42 @@ func GetSMSToken() BearerResponse {
 		return bear
 	}
 }
-func OrderNewNumber(bear BearerResponse) VerificationObject {
+
+func OrderNewNumber(bear BearerResponse, tid string) VerificationObject {
 
 	url := "https://www.textverified.com/api/Verifications"
 	method := "POST"
-
 	payload := strings.NewReader(`{` + "\n" + `"id": 53` + "\n" + `}`)
-
 	client := &http.Client{}
-	req, err := http.NewRequest(method, url, payload)
 
+	fmt.Println("Task ID: " + tid + " - Ordering New Number")
+	req, err := http.NewRequest(method, url, payload)
 	if err != nil {
-		panic(err)
+		os.Exit(137)
 	}
 	req.Header.Add("content-type", "application/json")
 	req.Header.Add("Authorization", "Bearer "+bear.BearerToken)
 
 	res, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		os.Exit(138)
 	}
 	defer res.Body.Close()
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		panic(err)
+		os.Exit(139)
 	}
 	var numRes VerificationObject
 	if err := json.Unmarshal(body, &numRes); err != nil { // Parse []byte to go struct pointer
 		fmt.Println("Can not unmarshal JSON")
 	}
-
+	fmt.Println("Task ID: " + tid + " - Number Recieved")
 	return numRes
 }
-func CheckExistingNumber(bear BearerResponse, num VerificationObject) string {
+func CheckExistingNumber(bear BearerResponse, num VerificationObject, tid string, iter int) string {
+
+	fmt.Println("Task ID: " + tid + " - Attempt: " + fmt.Sprint(iter))
 
 	url := "https://www.textverified.com/api/Verifications/" + num.ID
 	method := "GET"
@@ -84,19 +94,19 @@ func CheckExistingNumber(bear BearerResponse, num VerificationObject) string {
 	req, err := http.NewRequest(method, url, nil)
 
 	if err != nil {
-		panic(err)
+		os.Exit(140)
 	}
 	req.Header.Add("Authorization", "Bearer "+bear.BearerToken)
 
 	res, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		os.Exit(141)
 	}
 	defer res.Body.Close()
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		panic(err)
+		os.Exit(142)
 	}
 	var numRes VerificationObject
 	if err := json.Unmarshal(body, &numRes); err != nil { // Parse []byte to go struct pointer
@@ -107,6 +117,6 @@ func CheckExistingNumber(bear BearerResponse, num VerificationObject) string {
 		return numRes.Code
 	} else {
 		time.Sleep(time.Duration(rand.Intn(120)) * time.Second)
-		return CheckExistingNumber(bear, num)
+		return CheckExistingNumber(bear, num, tid, iter+1)
 	}
 }
