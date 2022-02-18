@@ -15,7 +15,7 @@ import (
 //////////////////////////////////////////////////////////////////////////////////////////
 //								SMS VERIFICATION TASKS									//
 //////////////////////////////////////////////////////////////////////////////////////////
-func GetSMSToken(tid string) BearerResponse {
+func GetSMSToken(task *Task) BearerResponse {
 
 	//Request Setup
 	tvURL := "https://www.textverified.com/api/"
@@ -29,7 +29,7 @@ func GetSMSToken(tid string) BearerResponse {
 	}
 
 	//Performing Request
-	fmt.Println("Task ID: " + tid + " | Getting Bearer Token")
+	log(task, "Getting Bearer Token")
 	res, err := client.Do(req)
 	if err != nil {
 
@@ -51,14 +51,14 @@ func GetSMSToken(tid string) BearerResponse {
 	}
 }
 
-func OrderNewNumber(bear BearerResponse, tid string) VerificationObject {
+func OrderNewNumber(bear BearerResponse, task *Task) VerificationObject {
 
 	url := "https://www.textverified.com/api/Verifications"
 	method := "POST"
 	payload := strings.NewReader(`{` + "\n" + `"id": 53` + "\n" + `}`)
 	client := &http.Client{}
 
-	fmt.Println("Task ID: " + tid + " | Ordering New Number")
+	log(task, "Ordering New Number")
 	req, err := http.NewRequest(method, url, payload)
 	if err != nil {
 		os.Exit(137)
@@ -80,12 +80,12 @@ func OrderNewNumber(bear BearerResponse, tid string) VerificationObject {
 	if err := json.Unmarshal(body, &numRes); err != nil { // Parse []byte to go struct pointer
 		fmt.Println("Can not unmarshal JSON")
 	}
-	fmt.Println("Task ID: " + tid + " | Number Recieved")
+	log(task, "Number Recieved")
 	return numRes
 }
 
-func CheckExistingNumber(bear BearerResponse, num VerificationObject, tid string, iter int) string {
-	fmt.Println("Task ID: " + tid + " | Waiting For Code - Attempt: " + fmt.Sprint(iter))
+func CheckExistingNumber(bear BearerResponse, num VerificationObject, task *Task, iter int) string {
+	log(task, "Waiting For Code - Attempt: "+fmt.Sprint(iter))
 
 	//Request Setup
 	url := "https://www.textverified.com/api/Verifications/" + num.ID
@@ -120,6 +120,6 @@ func CheckExistingNumber(bear BearerResponse, num VerificationObject, tid string
 		return numRes.Code
 	} else {
 		time.Sleep(time.Duration(rand.Intn(120)) * time.Second)
-		return CheckExistingNumber(bear, num, tid, iter+1)
+		return CheckExistingNumber(bear, num, task, iter+1)
 	}
 }

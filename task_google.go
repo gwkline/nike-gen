@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"math/rand"
 	"strings"
 	"time"
@@ -15,31 +14,31 @@ import (
 //////////////////////////////////////////////////////////////////////////////////////////
 //									GOOGLE TASKS										//
 //////////////////////////////////////////////////////////////////////////////////////////
-func googleTask(ctx context.Context, tid string) chromedp.Tasks {
+func googleTask(ctx context.Context, task *Task) chromedp.Tasks {
 	return chromedp.Tasks{
-		print("Task ID: " + tid + " | Beginning Google"),
+		logTask(task, "Beginning Google"),
 		chromedp.Navigate("https://www.google.com"),
 		chromedp.Sleep(time.Duration(3 * time.Second)),
 		chromedp.WaitVisible(`#Mses6b`),
 		chromedp.Click(googleSearchButton, chromedp.ByQuery),
-		chromedp.SendKeys(googleSearchButton, "site:nike.com/t/ "+randomProd(tid)+kb.Enter, chromedp.ByQuery),
+		chromedp.SendKeys(googleSearchButton, "site:nike.com/t/ "+randomProd(task)+kb.Enter, chromedp.ByQuery),
 		chromedp.Sleep(time.Duration(3 * time.Second)),
-		linkSelector(tid, ctx),
+		linkSelector(task, ctx),
 	}
 }
 
-func randomProd(tid string) string {
+func randomProd(task *Task) string {
 
 	choices := []string{"shirt", "shorts", "accessories", "hats"}
 	rand.Seed(time.Now().UnixNano())
 	num := rand.Intn(len(choices))
 
-	fmt.Println("Task ID: " + tid + " | Search String Chosen: " + choices[num])
+	log(task, "Search String Chosen: "+choices[num])
 
 	return choices[num]
 }
 
-func linkSelector(tid string, ctx context.Context) chromedp.Tasks {
+func linkSelector(task *Task, ctx context.Context) chromedp.Tasks {
 
 	var nodes []*cdp.Node
 	var productLinks []string
@@ -67,7 +66,7 @@ func linkSelector(tid string, ctx context.Context) chromedp.Tasks {
 			randIdx := rand.Intn(len(productLinks))
 			randURL := productLinks[randIdx]
 			searchString := `[href="` + randURL + `"]`
-			fmt.Println("Task ID: " + tid + " | Product Chosen (" + randURL + ")")
+			logTask(task, "Task ID: "+task.Task_ID+" | Product Chosen ("+randURL+")")
 			chromedp.Action(chromedp.Click(searchString, chromedp.ByQuery)).Do(ctx)
 			return nil
 		}),

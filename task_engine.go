@@ -10,13 +10,13 @@ import (
 	"github.com/chromedp/chromedp"
 )
 
-func runTasks(proxy Proxy, email string, tid string, attempt int) {
+func runTasks(task *Task) {
 
-	if attempt > 2 {
+	if task.Attempt > 2 {
 		return
 	}
 
-	fmt.Println("Task ID: " + tid + " | Initializing Browser")
+	log(task, "Initializing Browser")
 
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
 		chromedp.Flag(`headless`, false),
@@ -40,6 +40,7 @@ func runTasks(proxy Proxy, email string, tid string, attempt int) {
 	//TODO: ADD ADJUSTABILITY
 	ctx, cancel = context.WithTimeout(ctx, 600*time.Second)
 	defer cancel()
+
 	lctx, lcancel := context.WithCancel(ctx)
 	chromedp.ListenTarget(lctx, func(ev interface{}) {
 		switch ev := ev.(type) {
@@ -55,8 +56,8 @@ func runTasks(proxy Proxy, email string, tid string, attempt int) {
 					_ = chromedp.Run(ctx,
 						fetch.ContinueWithAuth(ev.RequestID, &fetch.AuthChallengeResponse{
 							Response: fetch.AuthChallengeResponseResponseProvideCredentials,
-							Username: proxy.User,
-							Password: proxy.Pass,
+							Username: task.Proxy.User,
+							Password: task.Proxy.Pass,
 						}),
 						fetch.Disable(),
 					)
@@ -70,22 +71,23 @@ func runTasks(proxy Proxy, email string, tid string, attempt int) {
 	//Google Tasks
 	err := chromedp.Run(ctx,
 		fetch.Enable().WithHandleAuthRequests(true),
-		googleTask(ctx, tid),
+		googleTask(ctx, task),
 	)
 	if err != nil {
 		// fmt.Println(err)
 		// os.Exit(145)
 		cancel()
 		time.Sleep(5 * time.Second)
-		runTasks(proxy, email, tid, attempt+1)
+		task.Attempt++
+		runTasks(task)
 
 	}
 
 	//Login Tasks
 	err = chromedp.Run(ctx,
 		fetch.Enable().WithHandleAuthRequests(true),
-		nikeSignupTask(ctx, tid),
-		nikeGoToPhoneNumber(ctx, tid),
+		nikeSignupTask(ctx, task),
+		nikeGoToPhoneNumber(ctx, task),
 	)
 	if err != nil {
 		fmt.Println(err)
@@ -93,11 +95,11 @@ func runTasks(proxy Proxy, email string, tid string, attempt int) {
 	}
 
 	//SMS Tasks (Init)
-	token := GetSMSToken(tid)
-	order := OrderNewNumber(token, tid)
+	token := GetSMSToken(task)
+	order := OrderNewNumber(token, task)
 	err = chromedp.Run(ctx,
 		fetch.Enable().WithHandleAuthRequests(true),
-		nikeInputPhoneNumber(string(order.Number), ctx, tid),
+		nikeInputPhoneNumber(string(order.Number), ctx, task),
 	)
 	if err != nil {
 		fmt.Println(err)
@@ -105,13 +107,11 @@ func runTasks(proxy Proxy, email string, tid string, attempt int) {
 	}
 
 	//SMS Tasks (Confirm)
-	code := CheckExistingNumber(token, order, tid, 1)
+	code := CheckExistingNumber(token, order, task, 1)
 	err = chromedp.Run(ctx,
 		fetch.Enable().WithHandleAuthRequests(true),
-		nikeConfirmPhoneNumber(code, ctx, tid))
+		nikeConfirmPhoneNumber(code, ctx, task))
 	if err != nil {
 		panic(err)
 	}
 }
-
-func logEngine()

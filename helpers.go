@@ -65,6 +65,21 @@ func randDelay(ctx context.Context) chromedp.Tasks {
 	}
 }
 
+func log(task *Task, status string) {
+	task.Status = status
+	fmt.Printf("Task ID: %s | %s\n", task.Task_ID, task.Status)
+}
+
+func logTask(task *Task, status string) chromedp.Tasks {
+	return chromedp.Tasks{
+		chromedp.ActionFunc(func(ctx context.Context) error {
+			task.Status = status
+			fmt.Printf("Task ID: %s | %s\n", task.Task_ID, task.Status)
+			return nil
+		}),
+	}
+}
+
 func print(message string) chromedp.Tasks {
 	return chromedp.Tasks{
 		chromedp.ActionFunc(func(ctx context.Context) error {
@@ -110,11 +125,11 @@ func PrettyPrint(i interface{}) string {
 	return string(s)
 }
 
-// func testTask(tid string) chromedp.Tasks {
+// func testTask(task *Task) chromedp.Tasks {
 // 	return chromedp.Tasks{
-// 		print("Task ID: " + tid + " - Beginning Debug"),
+// 		logTask(task, "Beginning Debug"),
 // 		chromedp.Navigate("https://detect.azerpas.com"),
-// 		print("Task ID: " + tid + " - Waiting: 10s"),
+// 		logTask(task, "Waiting 10s"),
 // 		chromedp.Sleep(time.Duration(10 * time.Second)),
 // 	}
 // }

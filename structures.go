@@ -35,8 +35,13 @@ type VerificationObject struct {
 }
 
 type Task struct {
-	Proxy   Proxy  `json:"proxy"`
-	Email   string `json:"email"`
-	Task_ID string `json:"tid"`
-	Attempt int    `json:"attempt"`
+	Proxy      Proxy  `json:"proxy"`
+	Email      string `json:"email"`
+	Task_ID    string `json:"tid"`
+	Attempt    int    `json:"attempt"`
+	Status     string `json:"status"`
+	First_Name string `json:"fname"`
+	Last_Name  string `json:"lname"`
+	DOB        string `json:"dob"`
+	Gender     int    `json:"gender"`
 }

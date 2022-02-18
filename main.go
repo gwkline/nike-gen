@@ -23,22 +23,25 @@ func main() {
 
 	for i := range emails {
 
+		var task Task
+
 		rand.Seed(time.Now().UnixNano())
 		randIdx := rand.Intn(len(proxies) - 1)
 
-		randProx := proxies[randIdx]
-		email := emails[0]
+		task.Proxy = proxies[randIdx]
+		task.Email = emails[0]
+		task.Attempt = 1
+		task.Task_ID = fmt.Sprint(i)
+
 		//TODO: FIX OUT OF INDEX ERROR
 		//proxies = append(proxies[:randIdx], proxies[randIdx+1:]...)
 		//emails = append(emails[:i], emails[i+1:]...)
 
-		if DEBUG {
-			fmt.Println("")
-			fmt.Println("Task ID: " + fmt.Sprint(i) + " | Starting")
-			fmt.Println("Task ID: " + fmt.Sprint(i) + " | Proxy Being Used: " + randProx.IP)
-			fmt.Println("Task ID: " + fmt.Sprint(i) + " | Email Being Used: " + email)
-		}
+		fmt.Println("")
+		log(&task, "Starting")
+		log(&task, "Proxy Being Used: "+task.Proxy.IP)
+		log(&task, "Email Being Used: "+task.Email)
 
-		runTasks(randProx, email, fmt.Sprint(i), 1)
+		runTasks(&task)
 	}
 }

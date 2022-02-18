@@ -14,28 +14,29 @@ import (
 //////////////////////////////////////////////////////////////////////////////////////////
 //									LOGIN TASKS											//
 //////////////////////////////////////////////////////////////////////////////////////////
-func nikeSignupTask(ctx context.Context, tid string) chromedp.Tasks {
+func nikeSignupTask(ctx context.Context, task *Task) chromedp.Tasks {
 	//TODO: Add scrolling/mouse movement, better email system
 	rand.Seed(time.Now().UnixNano())
-	gender := rand.Intn(1)
-	firstName := randomdata.FirstName(gender)
-	lastName := randomdata.LastName()
+	task.Gender = rand.Intn(1)
+	task.First_Name = randomdata.FirstName(task.Gender)
+	task.Last_Name = randomdata.LastName()
 	genderBtn := "test"
-	DOBString := monthToDigit(randomdata.Month()) + fmt.Sprint(randomdata.Number(2)) + fmt.Sprint(randomdata.Number(9)) + fmt.Sprint(rand.Intn(45)+1960)
+	task.DOB = monthToDigit(randomdata.Month()) + fmt.Sprint(randomdata.Number(2)) + fmt.Sprint(randomdata.Number(9)) + fmt.Sprint(rand.Intn(45)+1960)
 
 	rand.Seed(time.Now().UnixNano())
 	num := rand.Intn(2)
-	email := "test"
-	switch num {
-	case 0:
-		email = firstName + lastName + fmt.Sprint(rand.Intn(999)) + "@gmail.com"
-	case 1:
-		email = firstName + lastName + fmt.Sprint(rand.Intn(99)) + "@gmail.com"
-	case 2:
-		email = firstName + lastName + fmt.Sprint(rand.Intn(9)) + "@gmail.com"
+	if !USE_EMAIL_LIST {
+		switch num {
+		case 0:
+			task.Email = task.First_Name + task.Last_Name + fmt.Sprint(rand.Intn(999)) + "@gmail.com"
+		case 1:
+			task.Email = task.First_Name + task.Last_Name + fmt.Sprint(rand.Intn(99)) + "@gmail.com"
+		case 2:
+			task.Email = task.First_Name + task.Last_Name + fmt.Sprint(rand.Intn(9)) + "@gmail.com"
+		}
 	}
 
-	switch gender {
+	switch task.Gender {
 	case 0:
 		genderBtn = genderBtnMale
 	case 1:
@@ -44,10 +45,10 @@ func nikeSignupTask(ctx context.Context, tid string) chromedp.Tasks {
 
 	return chromedp.Tasks{
 		//chromedp.Navigate("https://www.nike.com/t/metcon-7-x-training-shoes-0l6Psg/CZ8281-883"),
-		print("Task ID: " + tid + " | Beginning Sign Up"),
-		print("Task ID: " + tid + " | Waiting For Page Load"),
+		logTask(task, "Beginning Sign Up"),
+		logTask(task, "Waiting For Page Load"),
 		chromedp.WaitVisible(waitPageNike1, chromedp.ByID),
-		print("Task ID: " + tid + " | Page Loaded"),
+		logTask(task, "Page Loaded"),
 		//move mouse around
 		//slowly scroll to bottom
 		//mouse move
@@ -56,7 +57,7 @@ func nikeSignupTask(ctx context.Context, tid string) chromedp.Tasks {
 		//move mouse
 		//scroll halfway up
 		//mouse move to Target
-		print("Task ID: " + tid + " | Random Scrolling"),
+		logTask(task, "Random Scrolling"),
 		chromedp.ScrollIntoView(detailsClick, chromedp.ByID),
 		randDelay(ctx),
 		chromedp.Click(detailsClick, chromedp.ByQuery),
@@ -64,7 +65,7 @@ func nikeSignupTask(ctx context.Context, tid string) chromedp.Tasks {
 		randDelay(ctx),
 
 		//Click Favorite Button
-		print("Task ID: " + tid + " | Clicking Favorite Button"),
+		logTask(task, "Clicking Favorite Button"),
 		chromedp.ScrollIntoView(favoriteBtn, chromedp.ByQuery),
 		randDelay(ctx),
 		//move mouse
@@ -72,7 +73,7 @@ func nikeSignupTask(ctx context.Context, tid string) chromedp.Tasks {
 		randDelay(ctx),
 
 		//Clicks Join Us Button
-		print("Task ID: " + tid + " | Clicking Join Us Button"),
+		logTask(task, "Clicking Join Us Button"),
 		chromedp.WaitVisible(waitPageNike2, chromedp.ByQuery),
 		//move mouse
 		chromedp.Click(joinUsBtn, chromedp.ByQuery),
@@ -83,91 +84,91 @@ func nikeSignupTask(ctx context.Context, tid string) chromedp.Tasks {
 
 		//mouse move + click
 		//delay
-		print("Task ID: " + tid + " | Entering Email"),
-		typeWord(emailInput, email, chromedp.BySearch, ctx),
+		logTask(task, "Entering Email"),
+		typeWord(emailInput, task.Email, chromedp.BySearch, ctx),
 		randDelay(ctx),
 
 		//tab (+ med delay) OR mouse move + click (+ high delay)
-		print("Task ID: " + tid + " | Entering Password"),
+		logTask(task, "Entering Password"),
 		typeWord(passwordInput, password.MustGenerate(15, 3, 3, false, false), chromedp.BySearch, ctx),
 		randDelay(ctx),
 
 		//tab (+ med delay) OR mouse move + click (+ high delay)
-		print("Task ID: " + tid + " | Entering First Name"),
-		typeWord(firstNameInput, firstName, chromedp.BySearch, ctx),
+		logTask(task, "Entering First Name"),
+		typeWord(firstNameInput, task.First_Name, chromedp.BySearch, ctx),
 		randDelay(ctx),
 
 		//tab (+ med delay) OR mouse move + click (+ high delay)
-		print("Task ID: " + tid + " | Entering Last Name"),
-		typeWord(lastNameInput, lastName, chromedp.BySearch, ctx),
+		logTask(task, "Entering Last Name"),
+		typeWord(lastNameInput, task.Last_Name, chromedp.BySearch, ctx),
 		randDelay(ctx),
 
 		//tab (+ med delay) OR mouse move + click (+ high delay)
 		//TODO: FIX typeWord for DOB, make higher than avg delays, different backspace mechanics
-		print("Task ID: " + tid + " | Entering DOB"),
-		chromedp.SendKeys(DOBInput, DOBString, chromedp.BySearch),
+		logTask(task, "Entering DOB"),
+		chromedp.SendKeys(DOBInput, task.DOB, chromedp.BySearch),
 		randDelay(ctx),
 
 		//Clicks Gender Button
 		//delay + mouse move
-		print("Task ID: " + tid + " | Choosing Gender"),
+		logTask(task, "Choosing Gender"),
 		chromedp.Click(genderBtn, chromedp.ByQuery),
 		randDelay(ctx),
 
 		//delay + mouse move
-		print("Task ID: " + tid + " | Clicking Sign Up"),
+		logTask(task, "Clicking Sign Up"),
 		chromedp.Click(signUpButton, chromedp.BySearch),
 
-		print("Task ID: " + tid + " | Signup Complete"),
+		logTask(task, "Signup Complete"),
 	}
 }
 
-func nikeGoToPhoneNumber(ctx context.Context, tid string) chromedp.Tasks {
+func nikeGoToPhoneNumber(ctx context.Context, task *Task) chromedp.Tasks {
 	return chromedp.Tasks{
 
-		print("Task ID: " + tid + " | Navigating To Settings"),
-		print("Task ID: " + tid + " | Waiting For Page Load"),
+		logTask(task, "Navigating To Settings"),
+		logTask(task, "Waiting For Page Load"),
 		chromedp.WaitVisible(waitPageNike1, chromedp.ByID),
-		print("Task ID: " + tid + " | Page Loaded"),
+		logTask(task, "Page Loaded"),
 
 		//CLICK ACCOUNT SETTINGS
-		print("Task ID: " + tid + " | Clicking Account Settings"),
+		logTask(task, "Clicking Account Settings"),
 		chromedp.Click(settingsButton, chromedp.ByQuery),
 
 		//CLICK ADD PHONE NUMBER
-		print("Task ID: " + tid + " | Clicking Add Phone Number"),
+		logTask(task, "Clicking Add Phone Number"),
 		chromedp.WaitVisible(addPhoneBtn, chromedp.ByQuery),
 		chromedp.Click(addPhoneBtn, chromedp.ByQuery),
 	}
 }
 
-func nikeInputPhoneNumber(number string, ctx context.Context, tid string) chromedp.Tasks {
+func nikeInputPhoneNumber(number string, ctx context.Context, task *Task) chromedp.Tasks {
 	return chromedp.Tasks{
 
 		//SEND CODE
-		print("Task ID: " + tid + " | Inputting Phone Number"),
+		logTask(task, "Inputting Phone Number"),
 		typeWord(phoneNumberInput, number, chromedp.ByQuery, ctx),
 
 		//CLICK CODE BOX
-		print("Task ID: " + tid + " | Requesting Code"),
+		logTask(task, "Requesting Code"),
 		chromedp.Click(codeBoxButton, chromedp.ByQuery),
 	}
 }
 
-func nikeConfirmPhoneNumber(code string, ctx context.Context, tid string) chromedp.Tasks {
+func nikeConfirmPhoneNumber(code string, ctx context.Context, task *Task) chromedp.Tasks {
 	return chromedp.Tasks{
 
 		//CLICK CODE BOX
-		print("Task ID: " + tid + " | Clicking Code Entry Box"),
+		logTask(task, "Clicking Code Entry Box"),
 		chromedp.WaitVisible(enterTheValueBtn, chromedp.BySearch),
 		chromedp.Click(enterTheValueBtn, chromedp.BySearch),
 
 		//SEND CODE
-		print("Task ID: " + tid + " | Inputting Code"),
+		logTask(task, "Inputting Code"),
 		typeWord(enterTheValueBtn, code, chromedp.BySearch, ctx),
 
 		//CLICK CONTINUE BOX
-		print("Task ID: " + tid + " | Saving"),
+		logTask(task, "Saving"),
 		chromedp.Click(continueButtonBox, chromedp.ByQuery),
 	}
 }
