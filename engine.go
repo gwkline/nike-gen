@@ -3,12 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
-	"math/rand"
 	"os"
-	"strings"
 	"time"
 
-	"github.com/chromedp/cdproto/cdp"
 	"github.com/chromedp/cdproto/fetch"
 	"github.com/chromedp/chromedp"
 )
@@ -67,45 +64,23 @@ func runTasks(proxy Proxy, email string, tid string) {
 
 	//googles a random nike product
 	//TODO: TRUE RANDOM PRODUCT SEARCH
-	var nodes []*cdp.Node
-	var productLinks []string
 
 	//Google Tasks (And Debug)
 	fmt.Println("Task ID: " + tid + " - Launching Browser")
 	err := chromedp.Run(ctx,
 		fetch.Enable().WithHandleAuthRequests(true),
 		//testTask(tid),
-		//chromedp.Sleep(10*time.Second),
 		googleTask(ctx, tid),
-		chromedp.Nodes("a", &nodes),
 	)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		os.Exit(145)
 	}
-
-	//Product Link Collector
-	for _, n := range nodes {
-		if strings.Contains(n.AttributeValue("href"), "https://www.nike.com/t/") {
-			productLinks = append(productLinks, n.AttributeValue("href"))
-		}
-	}
-	if len(productLinks) == 0 {
-		os.Exit(129)
-	}
-
-	//Random Link Selector
-	rand.Seed(time.Now().UnixNano())
-	randIdx := rand.Intn(len(productLinks))
-	randURL := productLinks[randIdx]
-	//searchString := `[href="` + randURL + `"]`
-	fmt.Println("Task ID: " + tid + " - Product Chosen (" + randURL + ")")
 
 	//Login Tasks
-
 	err = chromedp.Run(ctx,
 		fetch.Enable().WithHandleAuthRequests(true),
-		randDelay(10, ctx),
-		//chromedp.Click(searchString, chromedp.BySearch),
+
 		print("Task ID: "+tid+" - Beginning Sign Up"),
 		nikeSignupTask(ctx, tid),
 		print("Task ID: "+tid+" - Signup Complete"),

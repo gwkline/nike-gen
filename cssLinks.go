@@ -2,6 +2,8 @@ package main
 
 //GET DOM TRAVERSAL VALUES
 
+var googleSearchButton = `body > div.L3eUgb > div.o3j99.ikrT4e.om7nvf > form > div:nth-child(1) > div.A8SBwf > div.RNNXgb > div > div.a4bIc > input`
+
 var waitPageNike1 = `#hf_header_label_copyright`
 var waitPageNike2 = `#nike-unite-login-view > header > div.nike-unite-swoosh`
 

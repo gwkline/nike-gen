@@ -54,35 +54,12 @@ func typeWord(sel interface{}, word string, opts func(*chromedp.Selector), ctx c
 	}
 }
 
-func randDelay(length int, ctx context.Context) chromedp.Tasks {
+func randDelay(ctx context.Context) chromedp.Tasks {
 	return chromedp.Tasks{
 		chromedp.ActionFunc(func(ctx context.Context) error {
 			rand.Seed(time.Now().UnixNano())
-			num := rand.Intn(150)
-			switch num {
-			case 0:
-				chromedp.Sleep(time.Duration(num+0) * time.Millisecond).Do(ctx)
-			case 1:
-				chromedp.Sleep(time.Duration(num+10) * time.Millisecond).Do(ctx)
-			case 2:
-				chromedp.Sleep(time.Duration(num+20) * time.Millisecond).Do(ctx)
-			case 3:
-				chromedp.Sleep(time.Duration(num+30) * time.Millisecond).Do(ctx)
-			case 4:
-				chromedp.Sleep(time.Duration(num+50) * time.Millisecond).Do(ctx)
-			case 5:
-				chromedp.Sleep(time.Duration(num+100) * time.Millisecond).Do(ctx)
-			case 6:
-				chromedp.Sleep(time.Duration(num+175) * time.Millisecond).Do(ctx)
-			case 7:
-				chromedp.Sleep(time.Duration(num+250) * time.Millisecond).Do(ctx)
-			case 8:
-				chromedp.Sleep(time.Duration(num+500) * time.Millisecond).Do(ctx)
-			case 9:
-				chromedp.Sleep(time.Duration(num+750) * time.Millisecond).Do(ctx)
-			case 10:
-				chromedp.Sleep(time.Duration(num+1000) * time.Millisecond).Do(ctx)
-			}
+			num := rand.Intn(1000)
+			chromedp.Sleep(time.Duration(num) * time.Millisecond).Do(ctx)
 			return nil
 		}),
 	}
@@ -133,14 +110,14 @@ func PrettyPrint(i interface{}) string {
 	return string(s)
 }
 
-func testTask(tid string) chromedp.Tasks {
-	return chromedp.Tasks{
-		print("Task ID: " + tid + " - Beginning Debug"),
-		chromedp.Navigate("https://detect.azerpas.com"),
-		print("Task ID: " + tid + " - Waiting: 10s"),
-		chromedp.Sleep(time.Duration(10 * time.Second)),
-	}
-}
+// func testTask(tid string) chromedp.Tasks {
+// 	return chromedp.Tasks{
+// 		print("Task ID: " + tid + " - Beginning Debug"),
+// 		chromedp.Navigate("https://detect.azerpas.com"),
+// 		print("Task ID: " + tid + " - Waiting: 10s"),
+// 		chromedp.Sleep(time.Duration(10 * time.Second)),
+// 	}
+// }
 
 func loadProxies() []Proxy {
 
