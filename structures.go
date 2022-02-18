@@ -33,3 +33,10 @@ type VerificationObject struct {
 	ReportURI       string      `json:"report_uri"`
 	ReuseURI        string      `json:"reuse_uri"`
 }
+
+type Task struct {
+	Proxy   Proxy  `json:"proxy"`
+	Email   string `json:"email"`
+	Task_ID string `json:"tid"`
+	Attempt int    `json:"attempt"`
+}

@@ -58,7 +58,7 @@ func randDelay(ctx context.Context) chromedp.Tasks {
 	return chromedp.Tasks{
 		chromedp.ActionFunc(func(ctx context.Context) error {
 			rand.Seed(time.Now().UnixNano())
-			num := rand.Intn(1000)
+			num := rand.Intn(MAX_DELAY-MIN_DELAY) + MIN_DELAY
 			chromedp.Sleep(time.Duration(num) * time.Millisecond).Do(ctx)
 			return nil
 		}),

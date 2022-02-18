@@ -44,9 +44,10 @@ func nikeSignupTask(ctx context.Context, tid string) chromedp.Tasks {
 
 	return chromedp.Tasks{
 		//chromedp.Navigate("https://www.nike.com/t/metcon-7-x-training-shoes-0l6Psg/CZ8281-883"),
-		print("Task ID: " + tid + " - Waiting For Page Load"),
+		print("Task ID: " + tid + " | Beginning Sign Up"),
+		print("Task ID: " + tid + " | Waiting For Page Load"),
 		chromedp.WaitVisible(waitPageNike1, chromedp.ByID),
-		print("Task ID: " + tid + " - Page Loaded"),
+		print("Task ID: " + tid + " | Page Loaded"),
 		//move mouse around
 		//slowly scroll to bottom
 		//mouse move
@@ -55,7 +56,7 @@ func nikeSignupTask(ctx context.Context, tid string) chromedp.Tasks {
 		//move mouse
 		//scroll halfway up
 		//mouse move to Target
-		print("Task ID: " + tid + " - Random Scrolling"),
+		print("Task ID: " + tid + " | Random Scrolling"),
 		chromedp.ScrollIntoView(detailsClick, chromedp.ByID),
 		randDelay(ctx),
 		chromedp.Click(detailsClick, chromedp.ByQuery),
@@ -63,7 +64,7 @@ func nikeSignupTask(ctx context.Context, tid string) chromedp.Tasks {
 		randDelay(ctx),
 
 		//Click Favorite Button
-		print("Task ID: " + tid + " - Clicking Favorite Button"),
+		print("Task ID: " + tid + " | Clicking Favorite Button"),
 		chromedp.ScrollIntoView(favoriteBtn, chromedp.ByQuery),
 		randDelay(ctx),
 		//move mouse
@@ -71,7 +72,7 @@ func nikeSignupTask(ctx context.Context, tid string) chromedp.Tasks {
 		randDelay(ctx),
 
 		//Clicks Join Us Button
-		print("Task ID: " + tid + " - Clicking Join Us Button"),
+		print("Task ID: " + tid + " | Clicking Join Us Button"),
 		chromedp.WaitVisible(waitPageNike2, chromedp.ByQuery),
 		//move mouse
 		chromedp.Click(joinUsBtn, chromedp.ByQuery),
@@ -82,65 +83,61 @@ func nikeSignupTask(ctx context.Context, tid string) chromedp.Tasks {
 
 		//mouse move + click
 		//delay
-		print("Task ID: " + tid + " - Entering Email"),
+		print("Task ID: " + tid + " | Entering Email"),
 		typeWord(emailInput, email, chromedp.BySearch, ctx),
 		randDelay(ctx),
 
 		//tab (+ med delay) OR mouse move + click (+ high delay)
-		print("Task ID: " + tid + " - Entering Password"),
+		print("Task ID: " + tid + " | Entering Password"),
 		typeWord(passwordInput, password.MustGenerate(15, 3, 3, false, false), chromedp.BySearch, ctx),
 		randDelay(ctx),
 
 		//tab (+ med delay) OR mouse move + click (+ high delay)
-		print("Task ID: " + tid + " - Entering First Name"),
+		print("Task ID: " + tid + " | Entering First Name"),
 		typeWord(firstNameInput, firstName, chromedp.BySearch, ctx),
 		randDelay(ctx),
 
 		//tab (+ med delay) OR mouse move + click (+ high delay)
-		print("Task ID: " + tid + " - Entering Last Name"),
+		print("Task ID: " + tid + " | Entering Last Name"),
 		typeWord(lastNameInput, lastName, chromedp.BySearch, ctx),
 		randDelay(ctx),
 
 		//tab (+ med delay) OR mouse move + click (+ high delay)
 		//TODO: FIX typeWord for DOB, make higher than avg delays, different backspace mechanics
-		print("Task ID: " + tid + " - Entering DOB"),
+		print("Task ID: " + tid + " | Entering DOB"),
 		chromedp.SendKeys(DOBInput, DOBString, chromedp.BySearch),
 		randDelay(ctx),
 
 		//Clicks Gender Button
 		//delay + mouse move
-		print("Task ID: " + tid + " - Choosing Gender"),
+		print("Task ID: " + tid + " | Choosing Gender"),
 		chromedp.Click(genderBtn, chromedp.ByQuery),
 		randDelay(ctx),
 
 		//delay + mouse move
-		print("Task ID: " + tid + " - Clicking Sign Up"),
+		print("Task ID: " + tid + " | Clicking Sign Up"),
 		chromedp.Click(signUpButton, chromedp.BySearch),
-		randDelay(ctx),
-		chromedp.Sleep(1000 * time.Second),
+
+		print("Task ID: " + tid + " | Signup Complete"),
 	}
 }
 
 func nikeGoToPhoneNumber(ctx context.Context, tid string) chromedp.Tasks {
 	return chromedp.Tasks{
 
-		print("Task ID: " + tid + " - Waiting For Page Load"),
+		print("Task ID: " + tid + " | Navigating To Settings"),
+		print("Task ID: " + tid + " | Waiting For Page Load"),
 		chromedp.WaitVisible(waitPageNike1, chromedp.ByID),
+		print("Task ID: " + tid + " | Page Loaded"),
 
 		//CLICK ACCOUNT SETTINGS
-		print("Task ID: " + tid + " - Clicking Account Settings"),
+		print("Task ID: " + tid + " | Clicking Account Settings"),
 		chromedp.Click(settingsButton, chromedp.ByQuery),
 
 		//CLICK ADD PHONE NUMBER
-		print("Task ID: " + tid + " - Clicking Add Phone Number"),
+		print("Task ID: " + tid + " | Clicking Add Phone Number"),
 		chromedp.WaitVisible(addPhoneBtn, chromedp.ByQuery),
 		chromedp.Click(addPhoneBtn, chromedp.ByQuery),
-
-		//TODO: WHAT IS THIS?
-		//INPUT PHONE NUMBER
-		print("Task ID: " + tid + " - Adding Phone Number"),
-		chromedp.Click(phoneNumberInput, chromedp.ByQuery),
-		typeWord(phoneNumberInput, randomdata.Email(), chromedp.ByQuery, ctx),
 	}
 }
 
@@ -148,11 +145,11 @@ func nikeInputPhoneNumber(number string, ctx context.Context, tid string) chrome
 	return chromedp.Tasks{
 
 		//SEND CODE
-		print("Task ID: " + tid + " - Inputting Phone Number"),
+		print("Task ID: " + tid + " | Inputting Phone Number"),
 		typeWord(phoneNumberInput, number, chromedp.ByQuery, ctx),
 
 		//CLICK CODE BOX
-		print("Task ID: " + tid + " - Requesting Code"),
+		print("Task ID: " + tid + " | Requesting Code"),
 		chromedp.Click(codeBoxButton, chromedp.ByQuery),
 	}
 }
@@ -161,16 +158,16 @@ func nikeConfirmPhoneNumber(code string, ctx context.Context, tid string) chrome
 	return chromedp.Tasks{
 
 		//CLICK CODE BOX
-		print("Task ID: " + tid + " - Clicking Code Entry Box"),
+		print("Task ID: " + tid + " | Clicking Code Entry Box"),
 		chromedp.WaitVisible(enterTheValueBtn, chromedp.BySearch),
 		chromedp.Click(enterTheValueBtn, chromedp.BySearch),
 
 		//SEND CODE
-		print("Task ID: " + tid + " - Inputting Code"),
+		print("Task ID: " + tid + " | Inputting Code"),
 		typeWord(enterTheValueBtn, code, chromedp.BySearch, ctx),
 
 		//CLICK CONTINUE BOX
-		print("Task ID: " + tid + " - Saving"),
+		print("Task ID: " + tid + " | Saving"),
 		chromedp.Click(continueButtonBox, chromedp.ByQuery),
 	}
 }

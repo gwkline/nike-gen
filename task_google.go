@@ -17,7 +17,7 @@ import (
 //////////////////////////////////////////////////////////////////////////////////////////
 func googleTask(ctx context.Context, tid string) chromedp.Tasks {
 	return chromedp.Tasks{
-		print("Task ID: " + tid + " - Beginning Google"),
+		print("Task ID: " + tid + " | Beginning Google"),
 		chromedp.Navigate("https://www.google.com"),
 		chromedp.Sleep(time.Duration(3 * time.Second)),
 		chromedp.WaitVisible(`#Mses6b`),
@@ -34,7 +34,7 @@ func randomProd(tid string) string {
 	rand.Seed(time.Now().UnixNano())
 	num := rand.Intn(len(choices))
 
-	fmt.Println("Task ID: " + tid + " - Search String Shosen: " + choices[num])
+	fmt.Println("Task ID: " + tid + " | Search String Chosen: " + choices[num])
 
 	return choices[num]
 }
@@ -56,7 +56,7 @@ func linkSelector(tid string, ctx context.Context) chromedp.Tasks {
 			}
 
 			if len(productLinks) == 0 {
-				//fmt.Println("Task ID: " + tid + " - Error Scraping Links - Restarting")
+				//fmt.Println("Task ID: " + tid + " | Error Scraping Links | Restarting")
 				return cdp.Error("Error Scraping links")
 
 				//os.Exit(999)
@@ -67,7 +67,7 @@ func linkSelector(tid string, ctx context.Context) chromedp.Tasks {
 			randIdx := rand.Intn(len(productLinks))
 			randURL := productLinks[randIdx]
 			searchString := `[href="` + randURL + `"]`
-			fmt.Println("Task ID: " + tid + " - Product Chosen (" + randURL + ")")
+			fmt.Println("Task ID: " + tid + " | Product Chosen (" + randURL + ")")
 			chromedp.Action(chromedp.Click(searchString, chromedp.ByQuery)).Do(ctx)
 			return nil
 		}),

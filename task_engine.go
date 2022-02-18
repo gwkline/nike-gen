@@ -10,9 +10,13 @@ import (
 	"github.com/chromedp/chromedp"
 )
 
-func runTasks(proxy Proxy, email string, tid string) {
+func runTasks(proxy Proxy, email string, tid string, attempt int) {
 
-	fmt.Println("Task ID: " + tid + " - Initializing Browser")
+	if attempt > 2 {
+		return
+	}
+
+	fmt.Println("Task ID: " + tid + " | Initializing Browser")
 
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
 		chromedp.Flag(`headless`, false),
@@ -62,50 +66,45 @@ func runTasks(proxy Proxy, email string, tid string) {
 		}
 	})
 
-	//googles a random nike product
 	//TODO: TRUE RANDOM PRODUCT SEARCH
-
-	//Google Tasks (And Debug)
-	fmt.Println("Task ID: " + tid + " - Launching Browser")
+	//Google Tasks
 	err := chromedp.Run(ctx,
 		fetch.Enable().WithHandleAuthRequests(true),
-		//testTask(tid),
 		googleTask(ctx, tid),
 	)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(145)
+		// fmt.Println(err)
+		// os.Exit(145)
+		cancel()
+		time.Sleep(5 * time.Second)
+		runTasks(proxy, email, tid, attempt+1)
+
 	}
 
 	//Login Tasks
 	err = chromedp.Run(ctx,
 		fetch.Enable().WithHandleAuthRequests(true),
-
-		print("Task ID: "+tid+" - Beginning Sign Up"),
 		nikeSignupTask(ctx, tid),
-		print("Task ID: "+tid+" - Signup Complete"),
-		print("Task ID: "+tid+" - Navigating To Settings"),
 		nikeGoToPhoneNumber(ctx, tid),
 	)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		os.Exit(146)
 	}
 
 	//SMS Tasks (Init)
-	fmt.Println("Task ID: " + tid + " - Getting SMS Token")
 	token := GetSMSToken(tid)
-	fmt.Println("Task ID: " + tid + " - Ordering New Number")
 	order := OrderNewNumber(token, tid)
 	err = chromedp.Run(ctx,
 		fetch.Enable().WithHandleAuthRequests(true),
-		print("Task ID: "+tid+" - Beginning Number Input Process"),
-		nikeInputPhoneNumber(string(order.Number), ctx, tid))
+		nikeInputPhoneNumber(string(order.Number), ctx, tid),
+	)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		os.Exit(147)
 	}
 
 	//SMS Tasks (Confirm)
-	fmt.Println("Task ID: " + tid + " - Waiting For Code")
 	code := CheckExistingNumber(token, order, tid, 1)
 	err = chromedp.Run(ctx,
 		fetch.Enable().WithHandleAuthRequests(true),
@@ -114,3 +113,5 @@ func runTasks(proxy Proxy, email string, tid string) {
 		panic(err)
 	}
 }
+
+func logEngine()
