@@ -12,7 +12,13 @@ import (
 //TODO:
 // - MAKE INTO GOROUTINE
 // - BEGIN BROWSER CONFIGURATION (TLS?)
-//
+// - INDIVIDUAL STEP TIMEOUTS
+// - CLEAN TASK KILL/SCRIPT KILL UPON BROWSER CLOSE
+// - RETRY LOGIC
+// - ACCOUNT OUTPUT FILE
+// - INDIVIDUAL CHROMEDP TASK ERROR HANDLING (IF NEEDED)
+// - IMPROVE randomProd
+// - IMRPROVE HUMAN EMULATION / ADD SCROLLING
 //
 // FURTHER TODO'S LISTED BELOW
 
@@ -54,13 +60,18 @@ func main() {
 			fmt.Printf("Task ID: %s | ERROR - %+v\n", task.Task_ID, err.Error())
 			fmt.Printf("Task ID: %s | Attempting retry\n", task.Task_ID)
 			task.Attempt++
+
+			//TODO: RETRY LOGIC
 			//err = runTasks(&task)
+
 		} else if err != nil && task.Attempt > 2 {
 			fmt.Printf("Task ID: %s | ERROR - %+v\n", task.Task_ID, err.Error())
 			fmt.Printf("Task ID: %s | Task retry attempts exhausted\n", task.Task_ID)
 			//break
 		} else {
 			log(&task, "Creation Complete")
+
+			//TODO: OUTPUT ACCOUNT
 		}
 	}
 }
