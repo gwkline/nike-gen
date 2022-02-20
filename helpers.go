@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math/rand"
 	"os"
@@ -80,44 +81,35 @@ func logTask(task *Task, status string) chromedp.Tasks {
 	}
 }
 
-func print(message string) chromedp.Tasks {
-	return chromedp.Tasks{
-		chromedp.ActionFunc(func(ctx context.Context) error {
-			fmt.Println(message)
-			return nil
-		}),
-	}
-}
-
-func monthToDigit(month string) string {
+func monthToDigit(month string) (string, error) {
 	switch month {
 	case "January":
-		return "01"
+		return "01", nil
 	case "February":
-		return "02"
+		return "02", nil
 	case "March":
-		return "03"
+		return "03", nil
 	case "April":
-		return "04"
+		return "04", nil
 	case "May":
-		return "05"
+		return "05", nil
 	case "June":
-		return "06"
+		return "06", nil
 	case "July":
-		return "07"
+		return "07", nil
 	case "August":
-		return "08"
+		return "08", nil
 	case "September":
-		return "09"
+		return "09", nil
 	case "October":
-		return "10"
+		return "10", nil
 	case "November":
-		return "11"
+		return "11", nil
 	case "December":
-		return "12"
+		return "12", nil
 
 	}
-	return "ERROR"
+	return "", errors.New("monthToDigit: Error with given input: " + month)
 }
 
 func PrettyPrint(i interface{}) string {
@@ -134,14 +126,14 @@ func PrettyPrint(i interface{}) string {
 // 	}
 // }
 
-func loadProxies() []Proxy {
+func loadProxies() ([]Proxy, error) {
 
 	var proxies []Proxy
 
 	// open file
 	f, err := os.Open("proxies.txt")
 	if err != nil {
-		os.Exit(133)
+		return nil, err
 	}
 	// remember to close the file at the end of the program
 	defer f.Close()
@@ -163,20 +155,21 @@ func loadProxies() []Proxy {
 	}
 
 	if err := scanner.Err(); err != nil {
-		os.Exit(130)
+		return nil, err
 	}
+
 	rand.Seed(time.Now().UnixNano())
 	rand.Shuffle(len(proxies), func(i, j int) { proxies[i], proxies[j] = proxies[j], proxies[i] })
-	return proxies
+	return proxies, nil
 }
 
-func loadEmails() []string {
+func loadEmails() ([]string, error) {
 
 	var emails []string
 	// open file
 	f, err := os.Open("emails.txt")
 	if err != nil {
-		os.Exit(131)
+		return nil, err
 	}
 	// remember to close the file at the end of the program
 	defer f.Close()
@@ -192,8 +185,8 @@ func loadEmails() []string {
 	}
 
 	if err := scanner.Err(); err != nil {
-		os.Exit(132)
+		return nil, err
 	}
 
-	return emails
+	return emails, nil
 }

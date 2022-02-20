@@ -10,16 +10,23 @@ import (
 //								TASK ENGINE AND MAIN									//
 //////////////////////////////////////////////////////////////////////////////////////////
 //TODO:
-// - MAKE THREADED
+// - MAKE INTO GOROUTINE
 // - BEGIN BROWSER CONFIGURATION (TLS?)
-// -
+//
 //
 // FURTHER TODO'S LISTED BELOW
 
 func main() {
 
-	proxies := loadProxies()
-	emails := loadEmails()
+	proxies, err := loadProxies()
+	if err != nil {
+		fmt.Printf("\nProxy initialization error, %s", err.Error())
+	}
+
+	emails, err := loadEmails()
+	if err != nil && USE_EMAIL_LIST {
+		fmt.Printf("\n%s", err.Error())
+	}
 
 	for i := range emails {
 
@@ -42,6 +49,18 @@ func main() {
 		log(&task, "Proxy Being Used: "+task.Proxy.IP)
 		log(&task, "Email Being Used: "+task.Email)
 
-		runTasks(&task)
+		err = runTasks(&task)
+		if err != nil && task.Attempt < 3 {
+			fmt.Printf("Task ID: %s | ERROR - %+v\n", task.Task_ID, err.Error())
+			fmt.Printf("Task ID: %s | Attempting retry\n", task.Task_ID)
+			task.Attempt++
+			//err = runTasks(&task)
+		} else if err != nil && task.Attempt > 2 {
+			fmt.Printf("Task ID: %s | ERROR - %+v\n", task.Task_ID, err.Error())
+			fmt.Printf("Task ID: %s | Task retry attempts exhausted\n", task.Task_ID)
+			//break
+		} else {
+			log(&task, "Creation Complete")
+		}
 	}
 }

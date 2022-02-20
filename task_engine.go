@@ -2,18 +2,17 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"os"
+	"errors"
 	"time"
 
 	"github.com/chromedp/cdproto/fetch"
 	"github.com/chromedp/chromedp"
 )
 
-func runTasks(task *Task) {
+func runTasks(task *Task) error {
 
 	if task.Attempt > 2 {
-		return
+		return errors.New("runTasks: Task attempt limit reached")
 	}
 
 	log(task, "Initializing Browser")
@@ -74,12 +73,11 @@ func runTasks(task *Task) {
 		googleTask(ctx, task),
 	)
 	if err != nil {
-		// fmt.Println(err)
-		// os.Exit(145)
+
 		cancel()
 		time.Sleep(5 * time.Second)
 		task.Attempt++
-		runTasks(task)
+		return errors.New("googleTask: Error navigating to random product page")
 
 	}
 
@@ -87,31 +85,72 @@ func runTasks(task *Task) {
 	err = chromedp.Run(ctx,
 		fetch.Enable().WithHandleAuthRequests(true),
 		nikeSignupTask(ctx, task),
+	)
+	if err != nil {
+		cancel()
+		time.Sleep(5 * time.Second)
+		task.Attempt++
+		return errors.New("nikeSignupTask: Error creating Nike account")
+	}
+
+	//Login Tasks
+	err = chromedp.Run(ctx,
+		fetch.Enable().WithHandleAuthRequests(true),
 		nikeGoToPhoneNumber(ctx, task),
 	)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(146)
+		cancel()
+		time.Sleep(5 * time.Second)
+		task.Attempt++
+		return errors.New("nikeGoToPhoneNumber: Error navigating to profile SMS page")
 	}
 
 	//SMS Tasks (Init)
-	token := GetSMSToken(task)
-	order := OrderNewNumber(token, task)
+	token, err := GetSMSToken(task)
+	if err != nil {
+		cancel()
+		time.Sleep(5 * time.Second)
+		task.Attempt++
+		return err
+	}
+
+	order, err := OrderNewNumber(token, task)
+	if err != nil {
+		cancel()
+		time.Sleep(5 * time.Second)
+		task.Attempt++
+		return err
+	}
+
 	err = chromedp.Run(ctx,
 		fetch.Enable().WithHandleAuthRequests(true),
 		nikeInputPhoneNumber(string(order.Number), ctx, task),
 	)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(147)
+		cancel()
+		time.Sleep(5 * time.Second)
+		task.Attempt++
+		return errors.New("nikeInputPhoneNumber: Error inputting phone number")
 	}
 
 	//SMS Tasks (Confirm)
-	code := CheckExistingNumber(token, order, task, 1)
+	code, err := CheckExistingNumber(token, order, task, 1)
+	if err != nil {
+		cancel()
+		time.Sleep(5 * time.Second)
+		task.Attempt++
+		return err
+	}
+
 	err = chromedp.Run(ctx,
 		fetch.Enable().WithHandleAuthRequests(true),
 		nikeConfirmPhoneNumber(code, ctx, task))
 	if err != nil {
-		panic(err)
+		cancel()
+		time.Sleep(5 * time.Second)
+		task.Attempt++
+		return errors.New("nikeConfirmPhoneNumber: Error confirming phone number")
 	}
+
+	return nil
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"math/rand"
 	"strings"
 	"time"
@@ -55,10 +56,7 @@ func linkSelector(task *Task, ctx context.Context) chromedp.Tasks {
 			}
 
 			if len(productLinks) == 0 {
-				//fmt.Println("Task ID: " + tid + " | Error Scraping Links | Restarting")
-				return cdp.Error("Error Scraping links")
-
-				//os.Exit(999)
+				return errors.New("linkSelector: No working links found from search")
 			}
 
 			//Random Link Selector

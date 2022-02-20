@@ -21,7 +21,11 @@ func nikeSignupTask(ctx context.Context, task *Task) chromedp.Tasks {
 	task.First_Name = randomdata.FirstName(task.Gender)
 	task.Last_Name = randomdata.LastName()
 	genderBtn := "test"
-	task.DOB = monthToDigit(randomdata.Month()) + fmt.Sprint(randomdata.Number(2)) + fmt.Sprint(randomdata.Number(9)) + fmt.Sprint(rand.Intn(45)+1960)
+	month, err := monthToDigit(randomdata.Month())
+	if err != nil {
+		error.Error(err)
+	}
+	task.DOB = month + fmt.Sprint(randomdata.Number(9)) + fmt.Sprint(rand.Intn(45)+1960)
 
 	rand.Seed(time.Now().UnixNano())
 	num := rand.Intn(2)
@@ -44,7 +48,7 @@ func nikeSignupTask(ctx context.Context, task *Task) chromedp.Tasks {
 	}
 
 	return chromedp.Tasks{
-		//chromedp.Navigate("https://www.nike.com/t/metcon-7-x-training-shoes-0l6Psg/CZ8281-883"),
+
 		logTask(task, "Beginning Sign Up"),
 		logTask(task, "Waiting For Page Load"),
 		chromedp.WaitVisible(waitPageNike1, chromedp.ByID),
