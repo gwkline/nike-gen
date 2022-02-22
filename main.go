@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"os"
 	"time"
 )
 
@@ -43,7 +44,6 @@ func main() {
 
 		task.Proxy = proxies[randIdx]
 		task.Email = emails[0]
-		task.Attempt = 1
 		task.Task_ID = fmt.Sprint(i)
 
 		//TODO: FIX OUT OF INDEX ERROR
@@ -56,18 +56,18 @@ func main() {
 		log(&task, "Email Being Used: "+task.Email)
 
 		err = runTasks(&task)
-		if err != nil && task.Attempt < 3 {
+		if err != nil && maxAttempts(task) <= RETRY_LIMIT {
 			fmt.Printf("Task ID: %s | ERROR - %+v\n", task.Task_ID, err.Error())
 			fmt.Printf("Task ID: %s | Attempting retry\n", task.Task_ID)
-			task.Attempt++
 
 			//TODO: RETRY LOGIC
 			//err = runTasks(&task)
+			runTasks(&task)
 
-		} else if err != nil && task.Attempt > 2 {
+		} else if err != nil && maxAttempts(task) > RETRY_LIMIT {
 			fmt.Printf("Task ID: %s | ERROR - %+v\n", task.Task_ID, err.Error())
 			fmt.Printf("Task ID: %s | Task retry attempts exhausted\n", task.Task_ID)
-			//break
+			os.Exit(999)
 		} else {
 			log(&task, "Creation Complete")
 

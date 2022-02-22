@@ -25,7 +25,11 @@ func nikeSignupTask(ctx context.Context, task *Task) chromedp.Tasks {
 	if err != nil {
 		error.Error(err)
 	}
-	task.DOB = month + fmt.Sprint(randomdata.Number(9)) + fmt.Sprint(rand.Intn(45)+1960)
+
+	task.DOB[0] = month
+	task.DOB[1] = fmt.Sprint(randomdata.Number(9))
+	task.DOB[2] = fmt.Sprint(rand.Intn(45) + 1960)
+	fmt.Println(fmt.Sprintf(task.DOB[2]))
 
 	rand.Seed(time.Now().UnixNano())
 	num := rand.Intn(2)
@@ -110,7 +114,14 @@ func nikeSignupTask(ctx context.Context, task *Task) chromedp.Tasks {
 		//tab (+ med delay) OR mouse move + click (+ high delay)
 		//TODO: FIX typeWord for DOB, make higher than avg delays, different backspace mechanics
 		logTask(task, "Entering DOB"),
-		chromedp.SendKeys(DOBInput, task.DOB, chromedp.BySearch),
+
+		chromedp.SendKeys(DOBInput, task.DOB[0], chromedp.BySearch),
+		randDelay(ctx),
+
+		chromedp.SendKeys(DOBInput, task.DOB[1], chromedp.BySearch),
+		randDelay(ctx),
+
+		chromedp.SendKeys(DOBInput, task.DOB[2], chromedp.BySearch),
 		randDelay(ctx),
 
 		//Clicks Gender Button

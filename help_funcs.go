@@ -26,7 +26,7 @@ func typeWord(sel interface{}, word string, opts func(*chromedp.Selector), ctx c
 			for _, v := range word {
 				rand.Seed(time.Now().UnixNano())
 				randomInt := rand.Intn(999)
-				randDel := (rand.Intn(150) + 75)
+				randDel := (rand.Intn(150) + 150)
 
 				if randomInt < 939 {
 					chromedp.SendKeys(sel, string(v), opts).Do(ctx)
@@ -61,6 +61,15 @@ func randDelay(ctx context.Context) chromedp.Tasks {
 			rand.Seed(time.Now().UnixNano())
 			num := rand.Intn(MAX_DELAY-MIN_DELAY) + MIN_DELAY
 			chromedp.Sleep(time.Duration(num) * time.Millisecond).Do(ctx)
+			return nil
+		}),
+	}
+}
+
+func print(task Task, status string) chromedp.Tasks {
+	return chromedp.Tasks{
+		chromedp.ActionFunc(func(ctx context.Context) error {
+			fmt.Printf("Task ID: %s | %s\n", task.Task_ID, task.Status)
 			return nil
 		}),
 	}

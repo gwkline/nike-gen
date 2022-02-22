@@ -35,13 +35,50 @@ type VerificationObject struct {
 }
 
 type Task struct {
-	Proxy      Proxy  `json:"proxy"`
-	Email      string `json:"email"`
-	Task_ID    string `json:"tid"`
-	Attempt    int    `json:"attempt"`
-	Status     string `json:"status"`
-	First_Name string `json:"fname"`
-	Last_Name  string `json:"lname"`
-	DOB        string `json:"dob"`
-	Gender     int    `json:"gender"`
+	Proxy      Proxy     `json:"proxy"`
+	Email      string    `json:"email"`
+	Task_ID    string    `json:"tid"`
+	Status     string    `json:"status"`
+	First_Name string    `json:"fname"`
+	Last_Name  string    `json:"lname"`
+	DOB        [3]string `json:"dob"`
+	Gender     int       `json:"gender"`
+	Attempts   Attempts  `json:"attempts"`
+}
+
+type Attempts struct {
+	Google     int `json:"googleatt"`
+	Signup     int `json:"signupatt"`
+	Navigate   int `json:"navatt"`
+	OrderNum   int `json:"orderatt"`
+	CheckNum   int `json:"checkatt"`
+	ConfirmNum int `json:"confirmatt"`
+	InputNum   int `json:"inputatt"`
+	SMSAuth    int `json:"authatt"`
+	Nike       int `json:"nikeatt"`
+}
+
+func maxAttempts(att Task) int {
+	Google := att.Attempts.Google
+	Signup := att.Attempts.Signup
+	Navigate := att.Attempts.Navigate
+	OrderNum := att.Attempts.OrderNum
+	CheckNum := att.Attempts.CheckNum
+	ConfirmNum := att.Attempts.ConfirmNum
+	InputNum := att.Attempts.InputNum
+	SMSAuth := att.Attempts.SMSAuth
+	Nike := att.Attempts.Nike
+
+	x := []int{Google, Signup, Navigate, OrderNum, CheckNum, ConfirmNum, InputNum, SMSAuth, Nike}
+
+	biggest := x[0]
+	for _, v := range x {
+		if v > biggest {
+			biggest = v
+		}
+
+	}
+
+	return biggest
+
 }

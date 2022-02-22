@@ -11,15 +11,16 @@ import (
 
 func runTasks(task *Task) error {
 
-	if task.Attempt > 2 {
-		return errors.New("runTasks: Task attempt limit reached")
-	}
+	// if task.Attempt > RETRY_LIMIT {
+	// 	return errors.New("runTasks: Task attempt limit reached")
+	// }
 
 	log(task, "Initializing Browser")
 
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
 		chromedp.Flag(`headless`, false),
 		chromedp.Flag(`incognito`, true),
+		//chromedp.Flag("blink-settings", "imagesEnabled=false"),
 		chromedp.DisableGPU,
 		chromedp.Flag(`disable-extensions`, false),
 		chromedp.Flag(`enable-automation`, false),
@@ -76,7 +77,7 @@ func runTasks(task *Task) error {
 
 		cancel()
 		time.Sleep(5 * time.Second)
-		task.Attempt++
+		task.Attempts.Google++
 		return errors.New("googleTask: Error navigating to random product page")
 
 	}
@@ -89,7 +90,7 @@ func runTasks(task *Task) error {
 	if err != nil {
 		cancel()
 		time.Sleep(5 * time.Second)
-		task.Attempt++
+		task.Attempts.Nike++
 		return errors.New("nikeSignupTask: Error creating Nike account")
 	}
 
@@ -101,7 +102,7 @@ func runTasks(task *Task) error {
 	if err != nil {
 		cancel()
 		time.Sleep(5 * time.Second)
-		task.Attempt++
+		task.Attempts.Navigate++
 		return errors.New("nikeGoToPhoneNumber: Error navigating to profile SMS page")
 	}
 
@@ -110,7 +111,7 @@ func runTasks(task *Task) error {
 	if err != nil {
 		cancel()
 		time.Sleep(5 * time.Second)
-		task.Attempt++
+		task.Attempts.SMSAuth++
 		return err
 	}
 
@@ -118,7 +119,7 @@ func runTasks(task *Task) error {
 	if err != nil {
 		cancel()
 		time.Sleep(5 * time.Second)
-		task.Attempt++
+		task.Attempts.OrderNum++
 		return err
 	}
 
@@ -129,7 +130,7 @@ func runTasks(task *Task) error {
 	if err != nil {
 		cancel()
 		time.Sleep(5 * time.Second)
-		task.Attempt++
+		task.Attempts.InputNum++
 		return errors.New("nikeInputPhoneNumber: Error inputting phone number")
 	}
 
@@ -138,7 +139,7 @@ func runTasks(task *Task) error {
 	if err != nil {
 		cancel()
 		time.Sleep(5 * time.Second)
-		task.Attempt++
+		task.Attempts.CheckNum++
 		return err
 	}
 
@@ -148,7 +149,7 @@ func runTasks(task *Task) error {
 	if err != nil {
 		cancel()
 		time.Sleep(5 * time.Second)
-		task.Attempt++
+		task.Attempts.ConfirmNum++
 		return errors.New("nikeConfirmPhoneNumber: Error confirming phone number")
 	}
 
